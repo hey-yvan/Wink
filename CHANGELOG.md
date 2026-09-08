@@ -10,7 +10,7 @@ See the numbers behind your habits.
 
 - **Activity heatmap hover tooltip** — hovering over any cell in the Insights
   24-hour activity grid now shows the exact activation count and time window
-  (e.g., "5 activations · Tue Sep 8 2:00 PM – 2:59 PM"), with a highlighted
+  (e.g., "5 activations · Tue Sep 8 2:00 PM – 3:00 PM"), with a highlighted
   border around the hovered cell. The tooltip stays clamped within the card
   and dynamically flips below the cell when space above is tight.
 - **Accessible Insights** — each row in the 24-hour activity grid now exposes an
