@@ -4,6 +4,18 @@ Newest first. One `## X.Y.Z` section per release, written by hand **before** run
 `scripts/bump-version.sh X.Y.Z`. `scripts/release-notes.sh X.Y.Z` extracts a section as the
 GitHub Release body; the release workflow fails if the tagged version has no section here.
 
+## 0.7.5
+
+See the numbers behind your habits.
+
+- **Activity heatmap hover tooltip** — hovering over any cell in the Insights
+  24-hour activity grid now shows the exact activation count and time window
+  (e.g., "5 activations · Tue Sep 8 2:00 PM – 2:59 PM"), with a highlighted
+  border around the hovered cell. The tooltip stays clamped within the card
+  and dynamically flips below the cell when space above is tight.
+- **Accessible Insights** — each row in the 24-hour activity grid now exposes an
+  aggregated VoiceOver label summarizing its active hours.
+
 ## 0.7.4
 
 Different shortcuts for different work.
