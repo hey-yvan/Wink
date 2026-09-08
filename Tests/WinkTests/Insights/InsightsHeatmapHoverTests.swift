@@ -66,18 +66,15 @@ struct InsightsHeatmapHoverTests {
 
     @Test
     func windowTextDescribesTheOneHourBucketInLocale() {
-        let utc = TimeZone(secondsFromGMT: 0)!
         let english = InsightsHeatmapHoverMath.windowText(
             dateKey: "2026-04-23",
             hour: 14,
-            locale: Locale(identifier: "en_US"),
-            timeZone: utc
+            locale: Locale(identifier: "en_US")
         )
         let chinese = InsightsHeatmapHoverMath.windowText(
             dateKey: "2026-04-23",
             hour: 14,
-            locale: Locale(identifier: "zh_Hans_CN"),
-            timeZone: utc
+            locale: Locale(identifier: "zh_Hans_CN")
         )
 
         #expect(english.contains("Thu"))
@@ -94,8 +91,7 @@ struct InsightsHeatmapHoverTests {
         let text = InsightsHeatmapHoverMath.windowText(
             dateKey: "2026-09-02",
             hour: 23,
-            locale: Locale(identifier: "en_US"),
-            timeZone: TimeZone(secondsFromGMT: 0)!
+            locale: Locale(identifier: "en_US")
         )
 
         #expect(text.contains("Sep 2"))
@@ -104,10 +100,78 @@ struct InsightsHeatmapHoverTests {
         #expect(text.contains("11:59"))
     }
 
+    /// Bucket keys are nominal wall-clock values in the usage zone; the
+    /// label must repeat them, not normalise them. On 2026-03-08 the hour
+    /// 02:00 does not exist in America/Los_Angeles, and building it with
+    /// the local calendar would slide the bucket to 03:00 – 03:00.
+    @Test
+    func springForwardBucketKeepsItsNominalHour() {
+        let text = InsightsHeatmapHoverMath.windowText(
+            dateKey: "2026-03-08",
+            hour: 2,
+            locale: Locale(identifier: "en_US")
+        )
+        let compact = text.filter { !$0.isWhitespace }
+
+        #expect(text.contains("Mar 8"))
+        #expect(compact.contains("2:00–3:00AM"))
+    }
+
+    @Test
+    func tooltipFlipsBelowWheneverTheRowsAboveCannotFitIt() {
+        func originY(row: Int) -> CGFloat {
+            InsightsHeatmapHoverMath.tooltipOriginY(row: row, tooltipHeight: 22, cellHeight: 14, rowSpacing: 3, gap: 6)
+        }
+
+        // Row 0: nothing above → below the cell (14 + 6).
+        #expect(originY(row: 0) == 20)
+        // Row 1: 17pt above is less than 22 + 6 → still below (17 + 14 + 6).
+        #expect(originY(row: 1) == 37)
+        // Row 2: 34pt above fits 28 → above (34 − 6 − 22).
+        #expect(originY(row: 2) == 6)
+        #expect(originY(row: 6) == 74)
+    }
+
     @Test
     func windowTextFallsBackForUnparseableDateKey() {
         let text = InsightsHeatmapHoverMath.windowText(dateKey: "not-a-date", hour: 9, locale: Locale(identifier: "en_US"))
         #expect(text == "not-a-date 9:00")
+    }
+
+    @Test
+    func rowAccessibilityLabelNamesTheDayAndOnlyTheNonEmptyHours() throws {
+        var counts = Array(repeating: 0, count: 24)
+        counts[9] = 3
+        counts[14] = 1
+        let label = InsightsHeatmapHoverMath.rowAccessibilityLabel(
+            dateKey: "2026-04-23",
+            counts: counts,
+            locale: Locale(identifier: "en_US")
+        )
+
+        // The formatter separates "10:00" and "AM" with a narrow no-break
+        // space; compare with whitespace stripped.
+        let compact = label.filter { !$0.isWhitespace }
+        #expect(label.hasPrefix("Thu, Apr 23: "))
+        #expect(compact.contains("9:00–10:00AM"))
+        #expect(compact.contains("2:00–3:00PM"))
+        #expect(!compact.contains("12:00"))
+        // Hours are announced in chronological order.
+        let nine = try #require(compact.range(of: "9:00–10:00"))
+        let two = try #require(compact.range(of: "2:00–3:00"))
+        #expect(nine.lowerBound < two.lowerBound)
+    }
+
+    @Test
+    func rowAccessibilityLabelForAnEmptyDaySaysSo() {
+        let label = InsightsHeatmapHoverMath.rowAccessibilityLabel(
+            dateKey: "2026-04-23",
+            counts: Array(repeating: 0, count: 24),
+            locale: Locale(identifier: "en_US")
+        )
+
+        #expect(label.hasPrefix("Thu, Apr 23: "))
+        #expect(label.contains("0 "))
     }
 
     @Test

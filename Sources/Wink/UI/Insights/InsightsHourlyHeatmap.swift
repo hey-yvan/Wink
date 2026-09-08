@@ -67,15 +67,13 @@ enum InsightsHeatmapHoverMath {
 
     /// "Thu, Apr 23, 2:00 – 3:00 PM" / "4月23日 周四 14:00 – 15:00": the
     /// one-hour window a cell covers, in the user's locale and clock style.
-    static func windowText(
-        dateKey: String,
-        hour: Int,
-        locale: Locale = .current,
-        timeZone: TimeZone = .current
-    ) -> String {
-        let keyFormatter = UsageWindowMath.dateKeyFormatter(timeZone: timeZone)
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timeZone
+    static func windowText(dateKey: String, hour: Int, locale: Locale = .current) -> String {
+        intervalText(dateKey: dateKey, hour: hour, template: "EEEdMMMjm", locale: locale)
+    }
+
+    private static func intervalText(dateKey: String, hour: Int, template: String, locale: Locale) -> String {
+        let keyFormatter = UsageWindowMath.dateKeyFormatter(timeZone: nominalTimeZone)
+        let calendar = nominalCalendar
         // The last bucket ends at 23:59 rather than 00:00 of the next day:
         // an interval that crosses midnight makes the formatter spell out
         // both dates ("Wed, Sep 2 at 11:00 PM – Thu, Sep 3 at 12:00 AM").
@@ -91,9 +89,80 @@ enum InsightsHeatmapHoverMath {
         let formatter = DateIntervalFormatter()
         formatter.locale = locale
         formatter.calendar = calendar
-        formatter.timeZone = timeZone
-        formatter.dateTemplate = "EEEdMMMjm"
+        formatter.timeZone = nominalTimeZone
+        formatter.dateTemplate = template
         return formatter.string(from: start, to: end)
+    }
+
+    /// Vertical origin for the tooltip: floated above the hovered row when
+    /// the rows above it leave room for `tooltipHeight` plus the gap,
+    /// otherwise flipped below the cell. Row index alone is not enough —
+    /// row 1 has only one row pitch above it, less than a tooltip's height.
+    static func tooltipOriginY(
+        row: Int,
+        tooltipHeight: CGFloat,
+        cellHeight: CGFloat,
+        rowSpacing: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        let rowTop = CGFloat(row) * (cellHeight + rowSpacing)
+        let above = rowTop - gap - tooltipHeight
+        return above >= 0 ? above : rowTop + cellHeight + gap
+    }
+
+    /// Bucket keys are nominal wall-clock values ("2026-03-08", hour 2)
+    /// already expressed in the usage time zone. They are rebuilt and
+    /// formatted in a fixed-offset zone so a nonexistent local time (02:00
+    /// on a spring-forward day) is never normalised to 03:00 on its way to
+    /// the label — the zone only ever shifts wall clocks, and nothing here
+    /// should shift them.
+    private static let nominalTimeZone = TimeZone(secondsFromGMT: 0)!
+
+    private static var nominalCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = nominalTimeZone
+        return calendar
+    }
+
+    /// "Thu, Apr 23" / "4月23日 周四": the day a row covers.
+    static func dayText(dateKey: String, locale: Locale = .current) -> String {
+        guard let day = UsageWindowMath.dateKeyFormatter(timeZone: nominalTimeZone).date(from: dateKey) else {
+            return dateKey
+        }
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = nominalCalendar
+        formatter.timeZone = nominalTimeZone
+        formatter.setLocalizedDateFormatFromTemplate("EEEdMMM")
+        return formatter.string(from: day)
+    }
+
+    /// One row of the grid as a single VoiceOver element: the day, then
+    /// every non-empty hour with its count and window. Hover is the only
+    /// way to reach a cell's numbers visually, so the rows carry the same
+    /// information for assistive tech — one element per day rather than
+    /// 168 cells, most of which are empty.
+    static func rowAccessibilityLabel(
+        dateKey: String,
+        counts: [Int],
+        locale: Locale = .current
+    ) -> String {
+        let day = dayText(dateKey: dateKey, locale: locale)
+        let segments = counts.enumerated().compactMap { hour, count -> String? in
+            guard count > 0 else { return nil }
+            let activations = String(localized: "\(count) activations", bundle: WinkResourceBundle.bundle)
+            return "\(activations) \(hourRangeText(dateKey: dateKey, hour: hour, locale: locale))"
+        }
+        if segments.isEmpty {
+            return "\(day): \(String(localized: "\(0) activations", bundle: WinkResourceBundle.bundle))"
+        }
+        return "\(day): \(segments.joined(separator: ", "))"
+    }
+
+    /// "2:00 – 3:00 PM" / "14:00 – 15:00": the window alone, for contexts
+    /// that already name the day.
+    static func hourRangeText(dateKey: String, hour: Int, locale: Locale = .current) -> String {
+        intervalText(dateKey: dateKey, hour: hour, template: "jm", locale: locale)
     }
 
     /// Full tooltip line: "3 activations · Thu, Apr 23, 2:00 – 3:00 PM".
@@ -113,6 +182,9 @@ struct InsightsHourlyHeatmap: View {
     @State private var hoveredCell: InsightsHeatmapHoveredCell?
     @State private var gridSize: CGSize = .zero
     @State private var tooltipSize: CGSize = .zero
+    /// Recomputed only when `buckets` change: formatting 7 rows on every
+    /// hover-driven body evaluation would be wasted work.
+    @State private var rowAccessibilityLabels: [String] = []
 
     private var groupedRows: [(date: String, counts: [Int])] {
         let orderedDates = buckets.reduce(into: [String]()) { dates, bucket in
@@ -149,7 +221,7 @@ struct InsightsHourlyHeatmap: View {
                 HStack(alignment: .top, spacing: InsightsHeatmapLayout.labelGridSpacing) {
                     VStack(spacing: InsightsHeatmapLayout.rowSpacing) {
                         ForEach(groupedRows, id: \.date) { row in
-                            Text(dayLabel(for: row.date))
+                            Text(verbatim: dayLabel(for: row.date))
                                 .font(.system(size: 10, weight: .regular))
                                 .foregroundStyle(palette.textTertiary)
                                 .lineLimit(1)
@@ -158,6 +230,7 @@ struct InsightsHourlyHeatmap: View {
                                 .frame(height: InsightsHeatmapLayout.cellHeight)
                         }
                     }
+                    .accessibilityHidden(true)
 
                     cellGrid
                 }
@@ -188,10 +261,17 @@ struct InsightsHourlyHeatmap: View {
                             .frame(height: InsightsHeatmapLayout.cellHeight)
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(rowAccessibilityLabels.indices.contains(rowIndex) ? rowAccessibilityLabels[rowIndex] : "")
             }
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
+        .onChange(of: buckets, initial: true) {
+            rowAccessibilityLabels = groupedRows.map { row in
+                InsightsHeatmapHoverMath.rowAccessibilityLabel(dateKey: row.date, counts: row.counts)
+            }
+        }
         .onGeometryChange(for: CGSize.self) { proxy in proxy.size } action: { gridSize = $0 }
         .onContinuousHover(coordinateSpace: .local) { phase in
             switch phase {
@@ -224,8 +304,7 @@ struct InsightsHourlyHeatmap: View {
     }
 
     /// Centres the tooltip over the hovered column and floats it above the
-    /// hovered row. The top row has no room above it inside the card's
-    /// clip, so that one flips below the cell instead.
+    /// hovered row, or below it when the rows above leave no room.
     private func tooltipOffset(for hovered: InsightsHeatmapHoveredCell) -> CGSize {
         let x = InsightsHeatmapHoverMath.tooltipOriginX(
             hour: hovered.hour,
@@ -233,10 +312,13 @@ struct InsightsHourlyHeatmap: View {
             gridWidth: gridSize.width,
             columnSpacing: InsightsHeatmapLayout.columnSpacing
         )
-        let rowTop = CGFloat(hovered.row) * (InsightsHeatmapLayout.cellHeight + InsightsHeatmapLayout.rowSpacing)
-        let y = hovered.row == 0
-            ? rowTop + InsightsHeatmapLayout.cellHeight + InsightsHeatmapLayout.tooltipGap
-            : rowTop - InsightsHeatmapLayout.tooltipGap - tooltipSize.height
+        let y = InsightsHeatmapHoverMath.tooltipOriginY(
+            row: hovered.row,
+            tooltipHeight: tooltipSize.height,
+            cellHeight: InsightsHeatmapLayout.cellHeight,
+            rowSpacing: InsightsHeatmapLayout.rowSpacing,
+            gap: InsightsHeatmapLayout.tooltipGap
+        )
         return CGSize(width: x, height: y)
     }
 
