@@ -9,9 +9,15 @@ Wink's public release path now ships two distribution tracks from the same signe
 
 The release workflow signs `build/Wink.app`, wraps it in a notarization zip for `notarytool`, staples the notarized app bundle, packages both archives, uploads the versioned `Wink-<version>.dmg` and `Wink-<version>.zip` artifacts to Cloudflare R2, publishes the DMG on GitHub Releases, and only then uploads the live `appcast.xml` so Sparkle clients do not see a new update before the rest of the release succeeds.
 
-Ordinary CI verifies the package structure, smoke-tests the Sparkle ZIP/appcast generation path with temporary signing keys, and dry-runs the R2 upload helper. The dedicated `Release` workflow still requires real Apple signing credentials, Sparkle signing keys, and R2 credentials.
+Ordinary CI verifies the package structure, smoke-tests the Sparkle ZIP/appcast generation path with temporary signing keys, and dry-runs the R2 upload helper. The dedicated `Release` workflow requires Sparkle signing keys and R2 credentials. With all seven Apple secrets configured it uses Developer ID signing and notarization; with none only an explicit branch dry run may use ad-hoc mode. Public releases fail instead of falling back. A partial Apple secret set fails the readiness gate.
 
-## Prerequisites
+## Current distribution status
+
+As of 2026-09-17, the maintainer has confirmed Apple Developer Program enrollment. Public v0.7.5 remains ad-hoc signed and not notarized; enrollment alone does not change existing artifacts. A local signing-identity check confirms a valid Developer ID Application identity for team N3N46AWD2K; the `wink-notary` Keychain profile has been validated. A clean release build and Developer ID signatures passed, and the 1182-test suite passed. Apple submission `957db7f3-a383-4711-a599-45b106239bee` was verified Accepted on 2026-09-20, and its matching local app was stapled. The local DMG submission `31ae8571-ed8f-4c4c-9a8c-1d0faa08439b` was also Accepted and stapled on 2026-09-20. This does not change the already-published v0.7.5 artifacts. The maintainer reports that App Group `group.com.wink.app` is registered. Packaged runtime validation remains pending. The Developer ID path below is supported by the workflow, but is not evidence of a completed notarized release.
+
+After enrollment, configure the complete Apple secret set listed in `release.yml`, then rehearse the existing Developer ID path. Confirm notarization acceptance, stapling, Gatekeeper assessment, and a clean-Mac install before announcing notarized distribution. Preserve the existing Sparkle key so installed users retain update trust.
+
+## Prerequisites for Developer ID distribution
 
 - Apple Developer account
 - Xcode command-line tools installed
@@ -448,20 +454,42 @@ The `dry_run` input (default `true` for manual runs) builds and validates everyt
 
 The workflow fails if the Git tag does not match `CFBundleShortVersionString` (skipped when rehearsing a ref without a tag).
 
-Secret requirements are split into two groups (issue #283):
+Secret requirements are split into two groups (issue #440):
 
-- **Core (always required):** the two Sparkle keys and the five R2 credentials. If any is missing, the workflow exits successfully with a summary that lists the missing secrets and publishes nothing.
-- **Apple (optional as a complete set):** the four certificate/signing secrets (including `KEYCHAIN_PASSWORD`) and three notarytool secrets. All seven present → Developer ID signing plus notarization (`signing_mode=developer-id`). All seven absent → ad-hoc interim mode (`signing_mode=adhoc`). A partial set fails the run instead of silently degrading.
+- **Core (always required):** the two Sparkle keys and the five R2 credentials. If any is missing, readiness fails and publishes nothing.
+- **Apple (required for public releases):** the four certificate/signing secrets (including `KEYCHAIN_PASSWORD`) and three notarytool secrets. All seven present → Developer ID signing plus notarization (`signing_mode=developer-id`). All seven absent → ad-hoc mode only for an explicit branch dry run; tag publication fails. A partial set fails the run instead of silently degrading.
 
-### Ad-hoc interim mode
+### Internal and rehearsal packages
 
-While the maintainer has no Apple Developer Program membership, releases ship ad-hoc signed and unnotarized:
+The Internal Package workflow retains its existing developer/tester behavior.
+An explicit branch dry run with all Apple secrets absent may also create
+ad-hoc artifacts, clearly labelled as rehearsal artifacts. It cannot publish
+a GitHub release or live Sparkle feed. Partial Apple credentials always fail.
+Only a Developer ID rehearsal establishes readiness for public publication.
 
-- the app bundle is ad-hoc signed (`codesign -s -`) without hardened runtime; the DMG is unsigned
-- all notarization, stapling, and Gatekeeper (`spctl`) steps are skipped — `codesign --verify` still runs
-- Sparkle's EdDSA feed signature remains the update trust anchor, so in-app auto updates work exactly as in the full path
-- first install on macOS 15+ requires System Settings → Privacy & Security → **Open Anyway**; the release workflow appends this hint to the GitHub Release notes automatically
-- enrolling in the Apple Developer Program later requires no workflow changes: configure the seven Apple secrets and the next release is signed and notarized
+### Notarization evidence and timeout recovery
+
+`scripts/notarize.py` submits each archive once and records its submission ID,
+status, and terminal Apple log under `build/notarization/app` or `dmg`.
+The workflow retains this directory even on failure. It waits at most 20 minutes
+per archive and permits publication only after `Accepted` and successful log
+retrieval. Gatekeeper assessment runs after notarization and stapling.
+
+A timeout does not cancel Apple's submission. Inspect the saved ID with
+`notarytool info` before retrying. To finish locally, use the exact archived
+bytes and corresponding app; never apply old evidence to a rebuilt artifact.
+A new CI run builds new bytes and is a new notarization attempt, not a resume.
+
+For local use, authentication stays in Keychain:
+
+```bash
+python3 scripts/notarize.py build/Wink-X.Y.Z.dmg build/notarization/dmg \
+  --keychain-profile wink-notary
+```
+
+Public release signoff requires Gatekeeper enabled. A result containing
+`override=security disabled` is not clean-environment install proof. Preserve
+TCC upgrade validation separately from signature and notarization evidence.
 
 ### Release job flow
 
@@ -496,7 +524,7 @@ A manual `Release` run with `dry_run` enabled (the default) rehearses the full c
 
 - Leave `release_tag` empty. A rehearsal builds the ref it was dispatched from, so to rehearse specific content, dispatch from a branch pointing at that content.
 - **Do not set `release_tag` on a dry run.** It is rejected by the provenance preflight: the run would build the tag while its attestation named the dispatching branch's commit. See the outcome matrix under [Artifact Attestations](#artifact-attestations).
-- Dry runs require the same secrets as real releases; rehearsing the signed chain is the point.
+- Developer ID dry runs require the same secrets as real releases. Ad-hoc branch rehearsals do not establish public-release readiness.
 - While no live feed exists yet, the rehearse-mode gate still fails on 404 unless the `WINK_ALLOW_FIRST_RELEASE` repository variable is set (the same opt-in a first real release needs).
 
 When secrets are present, the workflow is fail-closed for the live Sparkle feed: if signing, notarization, appcast signing, GitHub Release publication, or the final appcast upload fails, Sparkle clients do not see the new update because `appcast.xml` is published last.

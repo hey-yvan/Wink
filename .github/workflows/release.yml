@@ -64,6 +64,7 @@ jobs:
       - name: Check release secrets
         id: check
         env:
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
           DEVELOPER_ID_APP_CERT_BASE64: ${{ secrets.DEVELOPER_ID_APP_CERT_BASE64 }}
           DEVELOPER_ID_APP_CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_APP_CERT_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
@@ -80,9 +81,12 @@ jobs:
           R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
         run: |
           # Core secrets (Sparkle feed signing + R2 distribution) are always required.
-          # Apple secrets are optional AS A COMPLETE SET (issue #283): all present =
-          # Developer ID signing + notarization; all absent = ad-hoc interim mode;
-          # a partial set is a misconfiguration and fails instead of degrading silently.
+          # Only explicit branch rehearsals may omit Apple credentials (#440).
+          # Public tag releases must never fall back to ad-hoc signing.
+          ALLOW_ADHOC=false
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$DRY_RUN_INPUT" = true ] && [[ "$GITHUB_REF" == refs/heads/* ]]; then
+            ALLOW_ADHOC=true
+          fi
           core_missing=()
           for secret_name in \
             SPARKLE_PUBLIC_ED_KEY \
@@ -118,17 +122,18 @@ jobs:
             echo "release_ready=false" >> "$GITHUB_OUTPUT"
             echo "missing_secrets=$missing_csv" >> "$GITHUB_OUTPUT"
             echo "signing_mode=" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "::error::Required core release credentials are missing." >&2
+            exit 1
           fi
 
           if [ "${#apple_missing[@]}" -eq 0 ]; then
             SIGNING_MODE=developer-id
-          elif [ "${#apple_missing[@]}" -eq 7 ]; then
+          elif [ "${#apple_missing[@]}" -eq 7 ] && [ "$ALLOW_ADHOC" = true ]; then
             SIGNING_MODE=adhoc
-            echo "::notice title=Ad-hoc release mode::No Apple Developer secrets configured — releasing ad-hoc signed, unnotarized artifacts (issue #283)."
+            echo "::notice title=Ad-hoc release mode::Explicit rehearsal only: ad-hoc artifacts will not be published."
           else
             apple_csv="$(IFS=,; echo "${apple_missing[*]}")"
-            echo "::error title=Partial Apple secrets::Configure all Apple secrets or none. Missing: $apple_csv" >&2
+            echo "::error title=Apple credentials required::Public releases require all Apple secrets; partial sets are never allowed. Missing: $apple_csv" >&2
             exit 1
           fi
 
@@ -154,7 +159,7 @@ jobs:
           {
             echo "## Release skipped"
             echo
-            echo "Wink's release pipeline always requires Sparkle signing keys and Cloudflare R2 credentials (Apple Developer secrets are optional — without them releases ship ad-hoc signed, see issue #283)."
+            echo "Public releases require all Apple, Sparkle and R2 credentials. Only explicit branch rehearsals may omit the complete Apple set."
             echo "The required core secrets below are not configured, so no release or Sparkle update feed was published."
             echo
             echo "Missing secrets:"
@@ -414,6 +419,9 @@ jobs:
           printf '%s' "$NOTARYTOOL_KEY" > "$NOTARY_KEY_PATH"
           chmod 600 "$NOTARY_KEY_PATH"
 
+      - name: Clean restored compiler products
+        run: swift package clean
+
       - name: Swift version
         run: swift --version
 
@@ -453,10 +461,6 @@ jobs:
               | grep -A1 -q 'com.apple.security.app-sandbox'
           fi
 
-      - name: Assess app with Gatekeeper
-        if: ${{ env.SIGNING_MODE == 'developer-id' }}
-        run: spctl --assess --type exec --verbose build/Wink.app
-
       - name: Archive app bundle for notarization
         if: ${{ env.SIGNING_MODE == 'developer-id' }}
         run: |
@@ -469,11 +473,10 @@ jobs:
           NOTARYTOOL_KEY_ID: ${{ secrets.NOTARYTOOL_KEY_ID }}
           NOTARYTOOL_ISSUER: ${{ secrets.NOTARYTOOL_ISSUER }}
         run: |
-          xcrun notarytool submit "$APP_NOTARIZATION_ZIP_PATH" \
+          python3 scripts/notarize.py "$APP_NOTARIZATION_ZIP_PATH" build/notarization/app \
             --key "$NOTARY_KEY_PATH" \
             --key-id "$NOTARYTOOL_KEY_ID" \
-            --issuer "$NOTARYTOOL_ISSUER" \
-            --wait
+            --issuer "$NOTARYTOOL_ISSUER"
 
       - name: Staple app notarization ticket
         if: ${{ env.SIGNING_MODE == 'developer-id' }}
@@ -482,6 +485,7 @@ jobs:
       - name: Validate notarized app bundle
         if: ${{ env.SIGNING_MODE == 'developer-id' }}
         run: |
+          spctl --status | grep -qx "assessments enabled"
           xcrun stapler validate build/Wink.app
           spctl --assess --type exec --verbose build/Wink.app
 
@@ -526,11 +530,10 @@ jobs:
           NOTARYTOOL_KEY_ID: ${{ secrets.NOTARYTOOL_KEY_ID }}
           NOTARYTOOL_ISSUER: ${{ secrets.NOTARYTOOL_ISSUER }}
         run: |
-          xcrun notarytool submit "$DMG_PATH" \
+          python3 scripts/notarize.py "$DMG_PATH" build/notarization/dmg \
             --key "$NOTARY_KEY_PATH" \
             --key-id "$NOTARYTOOL_KEY_ID" \
-            --issuer "$NOTARYTOOL_ISSUER" \
-            --wait
+            --issuer "$NOTARYTOOL_ISSUER"
 
       - name: Staple notarization ticket
         if: ${{ env.SIGNING_MODE == 'developer-id' }}
@@ -651,6 +654,14 @@ jobs:
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
           "$R2_UPLOAD_PYTHON" scripts/upload-r2-object.py "$APPCAST_PATH" application/xml
+
+      - name: Retain notarization evidence
+        if: ${{ always() && env.SIGNING_MODE == 'developer-id' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: notarization-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/notarization/
+          if-no-files-found: warn
 
       - name: Cleanup temporary credentials
         if: always()

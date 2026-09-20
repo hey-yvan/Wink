@@ -2,6 +2,9 @@
 
 This directory maps the maintainer-facing docs for Wink. Last reviewed: 2026-04-25 (issue #230). Next audit due: 2026-07-25.
 
+## Installation
+- [Install Wink](INSTALL.md) / [安装 Wink](INSTALL.zh-CN.md) — download, current signing status, permissions, and troubleshooting
+
 ## Core Docs
 - [`architecture.md`](./architecture.md) — current architecture and module responsibilities (the source of truth for app shell, toggle pipeline, and activation; supersedes everything in `archive/`)
 - [`github-automation.md`](./github-automation.md) — PR metadata enforcement, deterministic review gating, immutable action references and the Dependabot update loop, the OSV dependency gate, the CodeQL static-analysis baseline, the checked-in `main` ruleset artifact, Wink Backlog project reconciliation, runtime-validation field sync, and required repository secrets

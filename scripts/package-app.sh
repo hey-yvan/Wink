@@ -265,6 +265,9 @@ echo "==> Creating app bundle..."
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$FRAMEWORKS_DIR" "$EXTENSIONS_DIR"
 
+# Include the project license in every distributed app bundle.
+cp "$PROJECT_DIR/LICENSE" "$RESOURCES_DIR/LICENSE.txt"
+
 # Copy binary
 cp "$BINARY" "$MACOS_DIR/${APP_NAME}"
 chmod +x "$MACOS_DIR/${APP_NAME}"
