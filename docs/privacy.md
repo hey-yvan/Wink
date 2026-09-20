@@ -15,7 +15,7 @@ Wink is a local-first macOS utility. This page describes the behavior in the cur
 Wink may ask for:
 
 - `Accessibility`, so it can register and route global shortcuts
-- `Input Monitoring`, only when your current enabled shortcut set requires the Hyper-key event-tap path
+- `Input Monitoring`, when your enabled shortcuts require the Hyper-key event-tap path or the physical Fn observer for standard Fn+F-row bindings
 
 These permissions are used locally on your Mac to capture and route shortcuts. They are not analytics permissions and do not send shortcut events to a Wink server.
 

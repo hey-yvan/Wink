@@ -50,6 +50,9 @@ jobs:
           key: spm-${{ runner.os }}-${{ env.TOOLCHAIN_KEY }}-${{ hashFiles('Package.resolved') }}
           restore-keys: spm-${{ runner.os }}-${{ env.TOOLCHAIN_KEY }}-
 
+      - name: Notarization evidence tests
+        run: python3 scripts/test_notarize.py
+
       - name: Release script unit tests
         run: |
           brew install bats-core

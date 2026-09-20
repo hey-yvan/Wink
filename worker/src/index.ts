@@ -896,7 +896,7 @@ const landingHtml = `<!doctype html>
         <p>No account, no cloud, no telemetry. Your usage data lives in a SQLite file you can delete any time; the only network calls are update checks.</p>
       </div>
       <div class="principle">
-        <h3>Open source.</h3>
+        <h3>MIT licensed.</h3>
         <p>Swift 6, SwiftUI, built in the open on GitHub. Read every line before you trust it with your keyboard.</p>
       </div>
     </div>
@@ -916,7 +916,7 @@ const landingHtml = `<!doctype html>
         <a class="btn btn-ghost btn-2l" href="https://github.com/xrf9268-hue/Wink/blob/main/CHANGELOG.md" rel="noopener"><span>Changelog</span><span class="btn-sub">what's new</span></a>
       </div>
       <p class="meta">keeps itself updated · signed update feed · delete one file and it never existed</p>
-      <p class="fine">Needs Accessibility to route shortcuts. Input Monitoring is requested only if you turn on the Hyper layer or Fn-row bindings. First launch: right-click the app → Open — notarization is on the way.</p>
+      <p class="fine">Needs Accessibility to route shortcuts. Input Monitoring is requested only if you turn on the Hyper layer or Fn-row bindings. Current v0.7.5 is not notarized by Apple. After a blocked first launch, use System Settings → Privacy &amp; Security → Open Anyway if you trust the download.</p>
     </div>
   </section>
 
@@ -1691,7 +1691,7 @@ const guideHtml = `<!doctype html>
         <article class="chapter" id="install">
           <p class="eyebrow">00 · install</p>
           <h2>Drag it in. Open it once.</h2>
-          <p>Grab the DMG from <a href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener">GitHub Releases</a> and drag Wink into Applications. On first launch, macOS will balk at the unfamiliar signature — notarization is on the way. Right-click the app, choose <strong>Open</strong>, and macOS remembers that choice from then on.</p>
+          <p>Grab the DMG from <a href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener">GitHub Releases</a> and drag Wink into Applications. The current release v0.7.5 is ad-hoc signed and <strong>not notarized by Apple</strong>. If macOS blocks this trusted download, first try opening it, then go to <strong>System Settings → Privacy &amp; Security → Open Anyway</strong> and confirm Open. A damaged-app or malware warning is different: stop and check the download source.</p>
           <p>If this is a clean install with nothing configured yet, Wink opens Settings for you the moment it launches. You're never left staring at a bare menu bar icon wondering what to do next.</p>
           <p>Needs macOS 15 (Sequoia) or later. Nothing older is supported, and nothing more is required.</p>
         </article>
@@ -2395,7 +2395,7 @@ const guideZhHtml = `<!doctype html>
         <article class="chapter" id="install">
           <p class="eyebrow">00 · 安装</p>
           <h2>拖进去，打开一次。</h2>
-          <p>从 <a href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener">GitHub Releases</a> 下载 DMG，把 Wink 拖进"应用程序"文件夹。首次启动时，macOS 会对这个陌生的签名有点犹豫——公证正在路上。右键点击应用，选择<strong>打开</strong>，之后 macOS 就会一直记得这个选择。</p>
+          <p>从 <a href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener">GitHub Releases</a> 下载 DMG，把 Wink 拖进"应用程序"文件夹。当前版本 v0.7.5 使用临时签名，<strong>尚未通过 Apple 公证</strong>。若 macOS 阻止打开且你信任下载来源，先尝试启动一次，再进入<strong>系统设置 → 隐私与安全性 → 仍要打开</strong>，确认打开。若提示已损坏或包含恶意软件，请停止安装并核验来源。</p>
           <p>如果是全新安装、还什么都没配置，Wink 一启动就会自动帮你打开设置界面。你不会对着一个空荡荡的菜单栏图标发呆，不知道下一步该做什么。</p>
           <p>需要 macOS 15（Sequoia）或更高版本。更早的系统不支持，更高的要求也没有。</p>
         </article>

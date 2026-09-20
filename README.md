@@ -11,6 +11,21 @@ Wink is a macOS menu bar app for opening, focusing, and hiding apps with global 
 
 Website: [wink.aixie.de](https://wink.aixie.de) · User guide: [English](https://wink.aixie.de/guide) / [中文](https://wink.aixie.de/guide/zh)
 
+## Install
+
+Download the DMG from [GitHub Releases](https://github.com/xrf9268-hue/Wink/releases/latest),
+drag Wink to Applications, then open it from Applications.
+The current public release, v0.7.5, is ad-hoc signed and **not notarized by Apple**.
+If macOS blocks this trusted download, first attempt to open it, then use
+System Settings → Privacy & Security → Open Anyway and confirm Open.
+See the [installation guide](docs/INSTALL.md) ([中文](docs/INSTALL.zh-CN.md))
+for permissions, updates, and troubleshooting.
+
+## License
+
+Wink is available under the [MIT License](LICENSE). Third-party components
+retain their own licenses; Sparkle's notices are distributed with its framework.
+
 ## Why "Wink"?
 Wink suggests a quick, subtle signal: something that happens almost instantly and then gets out of the way. That is the feeling Wink aims for when switching apps.
 
@@ -31,7 +46,7 @@ Wink suggests a quick, subtle signal: something that happens almost instantly an
 ## Requirements
 - macOS 15 or later.
 - Accessibility permission for global shortcut routing.
-- Input Monitoring only when Hyper-routed shortcuts are enabled.
+- Input Monitoring when Hyper shortcuts or standard Fn+F-row bindings are enabled.
 - Swift 6 when building from source.
 
 ## Build
