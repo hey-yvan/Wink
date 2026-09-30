@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Every setting, permission, and keyboard quirk in Wink, explained plainly — from first launch to scripting it with wink://.">
+<meta name="description" content="The Wink user guide: installation, permissions, shortcuts, the Hyper key, window cycling, search, insights, pausing, the wink:// URL scheme and troubleshooting.">
 <meta name="color-scheme" content="light dark">
-<title>Wink — The manual</title>
+<title>Wink User Guide</title>
 <link rel="alternate" hreflang="en" href="https://wink.aixie.de/guide">
 <link rel="alternate" hreflang="zh-Hans" href="https://wink.aixie.de/guide/zh">
 <link rel="alternate" hreflang="x-default" href="https://wink.aixie.de/guide">
@@ -422,14 +422,13 @@
   <section class="guide-hero">
     <div class="wrap">
       <div class="guide-hero-copy">
-        <p class="dict"><span class="word">manual</span> <span class="ipa">/ˈmanjuəl/</span> · <em>noun</em> — the book you keep next to the thing</p>
-        <h1>The manual.</h1>
-        <p class="sub">Setup, permissions, every frontmost behavior, the Hyper layer, and the <kbd>wink://</kbd> scheme — the whole thing, in the order you'll actually meet it.</p>
+        <h1>User guide</h1>
+        <p class="sub">This guide covers setup, permissions, frontmost behaviors, the Hyper layer and the <kbd>wink://</kbd> URL scheme, in roughly the order you will use them.</p>
       </div>
       <div class="qf-row">
-        <div class="qf"><b>11</b><span>chapters, start to finish</span></div>
-        <div class="qf"><b>2</b><span>permissions — one of them conditional</span></div>
-        <div class="qf"><b>0</b><span>thumbnails — Screen Recording never asked</span></div>
+        <div class="qf"><b>11</b><span>chapters</span></div>
+        <div class="qf"><b>2</b><span>permissions, one of them only if needed</span></div>
+        <div class="qf"><b>0</b><span>thumbnails, so no Screen Recording permission</span></div>
       </div>
     </div>
   </section>
@@ -441,16 +440,16 @@
       <nav class="toc" aria-label="Chapters">
         <a href="#install">00 · install</a>
         <a href="#permissions">01 · permissions</a>
-        <a href="#first-chord">02 · first chord</a>
+        <a href="#first-chord">02 · first shortcut</a>
         <a href="#frontmost">03 · frontmost</a>
         <a href="#hyper">04 · hyper layer</a>
         <a href="#windows">05 · windows</a>
         <a href="#search">06 · search</a>
         <a href="#insights">07 · insights</a>
-        <a href="#quiet">08 · quiet</a>
+        <a href="#quiet">08 · pausing</a>
         <a href="#sharing">09 · sharing</a>
-        <a href="#troubleshooting">10 · nothing happened</a>
-        <a href="#extras" class="toc-extra">also, briefly</a>
+        <a href="#troubleshooting">10 · troubleshooting</a>
+        <a href="#extras" class="toc-extra">other settings</a>
       </nav>
 
       <div class="content">
@@ -458,147 +457,147 @@
         <!-- 00 -->
         <article class="chapter" id="install">
           <p class="eyebrow">00 · install</p>
-          <h2>Drag it in. Open it once.</h2>
+          <h2>Install Wink</h2>
           <p>Grab the DMG from <a href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener">GitHub Releases</a> and drag Wink into Applications. The current release v0.7.5 is ad-hoc signed and <strong>not notarized by Apple</strong>. If macOS blocks this trusted download, first try opening it, then go to <strong>System Settings → Privacy &amp; Security → Open Anyway</strong> and confirm Open. A damaged-app or malware warning is different: stop and check the download source.</p>
-          <p>If this is a clean install with nothing configured yet, Wink opens Settings for you the moment it launches. You're never left staring at a bare menu bar icon wondering what to do next.</p>
-          <p>Needs macOS 15 (Sequoia) or later. Nothing older is supported, and nothing more is required.</p>
+          <p>On a new install with no shortcuts configured, Wink opens Settings when it launches.</p>
+          <p>Wink requires macOS 15 (Sequoia) or later.</p>
         </article>
 
         <!-- 01 -->
         <article class="chapter" id="permissions">
           <p class="eyebrow">01 · permissions</p>
-          <h2>Two permissions. Never three.</h2>
-          <p class="lead-chips">One line of principle before the details:</p>
+          <h2>Permissions</h2>
+          <p class="lead-chips">Wink uses at most two permissions:</p>
           <p class="chips">
             <span class="chip is-on">Accessibility · required</span>
             <span class="chip">Input Monitoring · conditional</span>
             <span class="chip">Screen Recording · never</span>
           </p>
-          <p><strong>Accessibility</strong> is required — it's the API Wink uses to route every shortcut you record, standard chord or Hyper. Grant it in <strong>System Settings → Privacy &amp; Security → Accessibility</strong>, or work through the banner Wink shows at the top of <strong>Settings → Shortcuts</strong> until it clears.</p>
-          <p><strong>Input Monitoring</strong> only gets asked for once your configuration actually needs it — turn on the Hyper Key, or bind something to the Fn row, and Wink requests it; leave both alone and it never appears. The Permissions card in <strong>Settings → General</strong> marks each one Granted, Needed, or Optional against what you've actually configured, not a fixed checklist.</p>
-          <p><strong>Screen Recording</strong> isn't on that list, and it's not an oversight. Window pickers and window cycling read titles and icons through the Accessibility API alone — Wink has no use for a pixel of your screen, and it never will.</p>
+          <p><strong>Accessibility</strong> is required. Wink uses it to route every shortcut you record, both standard and Hyper. Grant it in <strong>System Settings → Privacy &amp; Security → Accessibility</strong>, or follow the banner at the top of <strong>Settings → Shortcuts</strong> until it goes away.</p>
+          <p><strong>Input Monitoring</strong> is requested only when your setup needs it: when you turn on the Hyper Key or bind a key on the Fn row. If you use neither, Wink does not ask for it. The Permissions card in <strong>Settings → General</strong> marks each permission Granted, Needed or Optional based on your current configuration.</p>
+          <p><strong>Screen Recording</strong> is not needed. The window picker and window cycling read window titles and icons through the Accessibility API, and Wink does not capture your screen.</p>
         </article>
 
         <!-- 02 -->
         <article class="chapter" id="first-chord">
-          <p class="eyebrow">02 · your first chord</p>
-          <h2>Pick an app. Press a chord.</h2>
-          <p>Open <strong>Settings → Shortcuts</strong>. The <strong>New Shortcut</strong> card asks for two things: a target app — search by name, pull from <strong>Recently Used</strong> or <strong>All Apps</strong>, or <strong>Browse…</strong> for anything living outside the usual folders — and a chord. Click into the Shortcut field and press your combination; it needs at least one modifier (⌘⌥⌃⇧), or you can skip that requirement entirely by binding it on the Hyper layer instead (chapter 04).</p>
+          <p class="eyebrow">02 · your first shortcut</p>
+          <h2>Add your first shortcut</h2>
+          <p>Open <strong>Settings → Shortcuts</strong>. The <strong>New Shortcut</strong> card asks for two things: a target app and a key combination. Find the app by name, choose it from <strong>Recently Used</strong> or <strong>All Apps</strong>, or use <strong>Browse…</strong> for apps outside the usual folders. Then click the Shortcut field and press the combination. It needs at least one modifier (⌘⌥⌃⇧), unless you bind it on the Hyper layer (chapter 04).</p>
           <figure class="fig">
             <img class="only-light" src="/media/settings-shortcuts-en-light.png" width="860" height="816" alt="Settings → Shortcuts: three Hyper shortcuts and the New Shortcut card" loading="lazy">
             <img class="only-dark" src="/media/settings-shortcuts-en-dark.png" width="860" height="816" alt="Settings → Shortcuts: three Hyper shortcuts and the New Shortcut card" loading="lazy">
-            <figcaption>Settings → Shortcuts — three chords in, the New Shortcut card waiting for a fourth.</figcaption>
+            <figcaption>Settings → Shortcuts with three shortcuts and the New Shortcut card.</figcaption>
           </figure>
-          <p>Click <strong>Add Shortcut</strong>, and the chord is live everywhere, immediately. Press it once from any app and Wink brings your target forward, launching it first if it wasn't already running. Press it again, and what happens next depends on the frontmost behavior in effect — chapter 03.</p>
+          <p>Click <strong>Add Shortcut</strong>. The shortcut works right away in every app. Press it once and Wink brings the target app forward, launching it first if it is not running. What a second press does depends on the frontmost behavior (chapter 03).</p>
           <figure class="fig">
             <video autoplay muted loop playsinline src="/media/guide-first-chord.mp4" width="1480" height="1000" aria-label="Pressing Hyper+S summons Safari, pressing again dismisses it"></video>
-            <figcaption>⇪S, three times — summon, dismiss, summon. Recorded as shipped.</figcaption>
+            <figcaption>⇪S pressed three times: show Safari, hide it, show it again. Recorded from the released app.</figcaption>
           </figure>
-          <p>One entry in the picker is worth knowing about early: <strong>Current App</strong>, pinned at the top. Bind a chord to it, and that single chord always acts on whatever app happens to be frontmost right now — no per-app binding required.</p>
+          <p>The app list also has a <strong>Current App</strong> entry at the top. A shortcut bound to it acts on whichever app is frontmost, so you do not need a separate binding for each app.</p>
         </article>
 
         <!-- 03 -->
         <article class="chapter" id="frontmost">
           <p class="eyebrow">03 · frontmost behaviors</p>
-          <h2>What the second press does.</h2>
-          <p class="lead-chips">Four answers to the same question — what happens when you press a chord for an app that's already frontmost:</p>
+          <h2>What a second press does</h2>
+          <p class="lead-chips">When you press a shortcut for an app that is already frontmost, Wink does one of four things:</p>
           <p class="chips">
             <span class="chip">Hide</span>
             <span class="chip is-on">Toggle</span>
             <span class="chip">Focus</span>
             <span class="chip">Cycle</span>
           </p>
-          <p><strong>Hide</strong> is the blunt one: if the app is frontmost, it hides. No questions asked, even if Wink wasn't what brought it forward.</p>
-          <p><strong>Toggle</strong>, the default, is summon-then-dismiss with judgement — it hides the app once its activation has actually settled, so a fast double-press can't yank away a window that's still arriving.</p>
-          <p><strong>Focus</strong> never hides anything: it un-hides and un-minimizes every one of that app's windows and keeps it in front, for an app you never want to lose track of.</p>
-          <p><strong>Cycle</strong> steps through that app's windows instead of hiding anything — with one caveat for single-window apps, covered in chapter 05.</p>
+          <p><strong>Hide</strong> hides the app whenever it is frontmost, even if Wink did not bring it forward.</p>
+          <p><strong>Toggle</strong> is the default. It hides the app only after its activation has finished, so a quick double press does not hide a window that is still opening.</p>
+          <p><strong>Focus</strong> never hides the app. It unhides and unminimizes all of the app's windows and keeps the app in front.</p>
+          <p><strong>Cycle</strong> moves to the app's next window instead of hiding it. Apps with a single window behave differently; see chapter 05.</p>
           <p>Set the default in <strong>Settings → General</strong> under <strong>“When target is frontmost”</strong>, or override it for one shortcut from that row's ⋯ menu.</p>
           <figure class="fig">
             <img class="only-light" src="/media/settings-general-en-light.png" width="860" height="816" alt="Settings → General with the When target is frontmost segmented control" loading="lazy">
             <img class="only-dark" src="/media/settings-general-en-dark.png" width="860" height="816" alt="Settings → General with the When target is frontmost segmented control" loading="lazy">
-            <figcaption>Settings → General — the default lives under “When target is frontmost”.</figcaption>
+            <figcaption>Settings → General. The default is set under “When target is frontmost”.</figcaption>
           </figure>
         </article>
 
         <!-- 04 -->
         <article class="chapter" id="hyper">
           <p class="eyebrow">04 · the hyper layer</p>
-          <h2>Caps Lock, promoted.</h2>
-          <p>Turn on <strong>Hyper Key</strong> in <strong>Settings → General</strong>, and Caps Lock becomes a fifth modifier: hold it down and it behaves like <kbd>⌃⌥⇧⌘</kbd> together, so a bare letter can carry a whole chord. Hold it, tap a letter, done.</p>
-          <p>While Hyper is on, the key is remapped away from Caps Lock entirely — a tap on its own does nothing: no shortcut, no capitals, no LED. Turn Hyper Key off and the key is its old self again. Quick fingers are fine, too: flick Caps Lock and let the letter land a breath late, and Wink still reads it as one chord — a release under about 80 milliseconds counts as part of the hold, not the end of it.</p>
-          <p>Forgotten a binding? Hold Caps Lock for just over half a second without touching anything else, and every enabled shortcut — Hyper-bound or not — fades in as an overlay; let go, and it's gone. It needs Hyper Key on and at least one enabled Hyper shortcut before it has anything to show; Settings says as much, right under the toggle.</p>
+          <h2>Use Caps Lock as a Hyper key</h2>
+          <p>Turn on <strong>Hyper Key</strong> in <strong>Settings → General</strong> and Caps Lock works as an extra modifier. Holding it is the same as holding <kbd>⌃⌥⇧⌘</kbd>, so a single letter is enough for a shortcut: hold Caps Lock and press the letter.</p>
+          <p>While Hyper Key is on, the key no longer works as Caps Lock. Tapping it by itself does nothing: no shortcut, no capital letters, no indicator light. Turn Hyper Key off to get normal Caps Lock back. If you release Caps Lock slightly before the letter, Wink still treats it as one shortcut, as long as the gap is under about 80 milliseconds.</p>
+          <p>To see your shortcuts, hold Caps Lock for just over half a second without pressing another key. An overlay lists every enabled shortcut, Hyper or not, and closes when you let go. It requires Hyper Key to be on and at least one enabled Hyper shortcut. Settings notes this under the toggle.</p>
           <figure class="fig">
             <video autoplay muted loop playsinline src="/media/guide-cheatsheet.mp4" width="1480" height="1000" aria-label="Holding Caps Lock brings up the cheat sheet overlay listing every shortcut"></video>
-            <figcaption>Hold ⇪ a beat longer than a chord — the whole map fades in.</figcaption>
+            <figcaption>Hold ⇪ a little longer than for a shortcut to show the overlay.</figcaption>
           </figure>
         </article>
 
         <!-- 05 -->
         <article class="chapter" id="windows">
           <p class="eyebrow">05 · windows</p>
-          <h2>Repeat the chord. Walk the windows.</h2>
-          <p>Set a shortcut's frontmost behavior to <strong>Cycle</strong> (chapter 03), then repeat the chord while its app is frontmost: each press steps to the next window, minimized ones included. A small HUD tracks your place — <kbd>2/5</kbd> · window title — on whichever display that window actually lives on.</p>
+          <h2>Cycle through an app's windows</h2>
+          <p>Set a shortcut's frontmost behavior to <strong>Cycle</strong> (chapter 03), then press the shortcut again while its app is frontmost. Each press moves to the next window, including minimized ones. A small HUD shows your position and the window title (<kbd>2/5</kbd> · window title) on the display where that window is.</p>
           <figure class="fig">
             <video autoplay muted loop playsinline src="/media/guide-cycle.mp4" width="1480" height="1000" aria-label="Repeating Hyper+T steps through Terminal windows while a HUD counts along"></video>
-            <figcaption>⇪T, again and again — the HUD keeps count, minimized windows join the walk.</figcaption>
+            <figcaption>⇪T pressed repeatedly. The HUD counts the windows, including minimized ones.</figcaption>
           </figure>
-          <p>One window (or none) is nothing to walk, so Cycle degrades on purpose: a concrete shortcut falls back to Toggle — press again and the app steps aside — while a Current App chord treats the press as a no-op, because "cycle whatever I'm in" must never hide the app under your hands.</p>
-          <p>Prefer to choose instead of step through? Opt a shortcut into <strong>Hold Action → Window Picker</strong> from its row's ⋯ menu, then hold the chord instead of tapping it: a list of that app's windows appears, minimized ones marked, navigate with ↑↓ and commit with ⏎. Icons and titles only, never thumbnails — that restraint is what lets Wink run without Screen Recording, and it always will.</p>
+          <p>If the app has one window or none, there is nothing to cycle. A shortcut for a specific app then behaves like Toggle and hides the app. A Current App shortcut does nothing, so it never hides the app you are working in.</p>
+          <p>To pick a window from a list instead, choose <strong>Hold Action → Window Picker</strong> in the shortcut row's ⋯ menu. Then hold the shortcut instead of tapping it. A list of the app's windows appears, with minimized windows marked. Use ↑↓ to choose and ⏎ to switch. The list shows icons and titles, not thumbnails, which is why Wink does not need Screen Recording.</p>
           <figure class="fig">
             <video autoplay muted loop playsinline src="/media/guide-picker.mp4" width="1480" height="1000" aria-label="Holding Hyper+S opens a window list, arrow keys choose, Return focuses"></video>
-            <figcaption>Hold ⇪S, then ↑↓ and ⏎ — titles and icons, never thumbnails.</figcaption>
+            <figcaption>Hold ⇪S, then use ↑↓ and ⏎. The list shows titles and icons.</figcaption>
           </figure>
         </article>
 
         <!-- 06 -->
         <article class="chapter" id="search">
           <p class="eyebrow">06 · search to switch</p>
-          <h2>Type two letters. Land anywhere.</h2>
-          <p>Give the palette its own trigger: <strong>Settings → General → Search Palette</strong>, recorded the same way as any other chord. Press it, type a few letters of any app's name — localized names match too — and hit <kbd>⏎</kbd>. Wink switches to it, launching it first if it wasn't already running.</p>
+          <h2>Switch to an app by searching</h2>
+          <p>Set a shortcut for the palette in <strong>Settings → General → Search Palette</strong>. You record it the same way as any other shortcut. Press it, type a few letters of an app's name (localized names also match) and press <kbd>⏎</kbd>. Wink switches to the app, launching it first if it is not running.</p>
           <figure class="fig">
             <video autoplay muted loop playsinline src="/media/guide-palette.mp4" width="1480" height="1000" aria-label="The search palette opens, safa is typed, Return switches to Safari"></video>
-            <figcaption>⇪Space → “safa” → ⏎ — Safari springs back from hidden.</figcaption>
+            <figcaption>⇪Space, type “safa”, press ⏎. Safari comes back from hidden.</figcaption>
           </figure>
-          <p>Recent switches float to the top of the empty-query list, so the app you just left is usually one keystroke away. Background agents and helper processes never show up — the palette only ever offers apps you could plausibly want to switch to.</p>
+          <p>Before you type anything, the list shows recently used apps first, so the app you just left is usually at the top. Background agents and helper processes are not listed.</p>
         </article>
 
         <!-- 07 -->
         <article class="chapter" id="insights">
           <p class="eyebrow">07 · insights</p>
-          <h2>It keeps score. Quietly.</h2>
-          <p><strong>Settings → Insights</strong> totals your activations, an estimated time saved (three seconds per switch, added up), your current streak of consecutive active days, and an hour-by-hour heatmap of when you actually reach for Wink. Flip between <strong>today</strong>, <strong>7 days</strong>, and <strong>30 days</strong> with the control at the top.</p>
+          <h2>Insights</h2>
+          <p><strong>Settings → Insights</strong> totals your activations, an estimated time saved (three seconds per switch, added up), your current streak of consecutive active days, and an hourly heatmap of when you use Wink. Switch between <strong>today</strong>, <strong>7 days</strong>, and <strong>30 days</strong> with the control at the top.</p>
           <figure class="fig">
             <img class="only-light" src="/media/settings-insights-en-light.png" width="860" height="816" alt="Settings → Insights: activations, time saved, streak, hourly heatmap, most-used list" loading="lazy">
             <img class="only-dark" src="/media/settings-insights-en-dark.png" width="860" height="816" alt="Settings → Insights: activations, time saved, streak, hourly heatmap, most-used list" loading="lazy">
-            <figcaption>Insights — activations, time saved, streak, and the hours you actually work.</figcaption>
+            <figcaption>Insights: activations, time saved, streak and hourly heatmap.</figcaption>
           </figure>
-          <p>All of it lives in a local SQLite file and is never uploaded — the Privacy page says so in plain terms, not fine print.</p>
-          <p>Turn on <strong>“Suggest shortcuts from app usage”</strong> in Settings → General, and Wink starts counting foreground activations locally. An app you keep switching to but never bound shows up in the <strong>Suggested shortcuts</strong> card with its count for the period, and a note to add one in Shortcuts — a nudge, not an automatic bind. Turn the toggle back off, and Wink deletes the counts it collected, not just stops collecting them.</p>
+          <p>This data is stored in a local SQLite file and is never uploaded. The Privacy page describes this in detail.</p>
+          <p>Turn on <strong>“Suggest shortcuts from app usage”</strong> in Settings → General, and Wink counts which apps come to the front, stored locally. An app you switch to often but have not bound appears in the <strong>Suggested shortcuts</strong> card with its count for the period and a note to add a shortcut in Shortcuts. Wink does not add the shortcut for you. If you turn the toggle off, Wink stops counting and deletes the counts it has collected.</p>
         </article>
 
         <!-- 08 -->
         <article class="chapter" id="quiet">
-          <p class="eyebrow">08 · quiet by design</p>
-          <h2>It knows when to go quiet.</h2>
-          <p class="lead-chips">The menu bar pill states the truth plainly:</p>
+          <p class="eyebrow">08 · pausing</p>
+          <h2>Secure Input and pausing</h2>
+          <p class="lead-chips">The menu bar pill shows Wink's current state:</p>
           <p class="chips">
             <span class="chip is-on">Ready</span>
             <span class="chip">Limited · Secure Input</span>
             <span class="chip">Paused</span>
             <span class="chip">Paused · &lt;App&gt;</span>
           </p>
-          <p>A password field or secure prompt grabs macOS Secure Input, and the pill switches to <strong>Limited · Secure Input</strong>. The Hyper layer and Fn-row shortcuts wait it out — they ride the same event tap Secure Input blocks — while ordinary modifier-key shortcuts keep firing straight through it. It resumes on its own the moment Secure Input ends.</p>
-          <p>Add an app under <strong>“Pause in exception apps”</strong> in Settings → General — a VM or remote-desktop client is the obvious case — and Wink pauses itself the instant that app is frontmost, the pill naming it directly (<strong>Paused · Parallels Desktop</strong>), and Caps Lock reverts fully to its native behavior for as long as that app stays in front.</p>
-          <p>And there's a master switch for all of it: <strong>“Pause all shortcuts”</strong>, one toggle away in the menu bar.</p>
+          <p>When a password field or secure prompt turns on macOS Secure Input, the pill changes to <strong>Limited · Secure Input</strong>. Hyper and Fn-row shortcuts stop working until it ends, because they use the event tap that Secure Input blocks. Shortcuts with ordinary modifier keys keep working. Wink returns to normal as soon as Secure Input ends.</p>
+          <p>Add an app under <strong>“Pause in exception apps”</strong> in Settings → General, for example a VM or remote-desktop client. Wink pauses whenever that app is frontmost, and the pill shows its name (<strong>Paused · Parallels Desktop</strong>). Caps Lock works as normal Caps Lock while that app is in front.</p>
+          <p>To pause everything, use <strong>“Pause all shortcuts”</strong> in the menu bar.</p>
         </article>
 
         <!-- 09 -->
         <article class="chapter" id="sharing">
           <p class="eyebrow">09 · sharing &amp; scripting</p>
-          <h2>Export it. Script it. Repeat it.</h2>
-          <p>Your whole shortcut set is one file. <strong>Export…</strong> in <strong>Settings → Shortcuts</strong> writes a <kbd>.winkrecipe</kbd>; <strong>Import…</strong> reads one back. Importing previews a plan first — what's <strong>Ready</strong>, what <strong>Conflicts</strong>, what's <strong>Unresolved</strong> — before you commit to <strong>Skip Conflicts</strong> or <strong>Replace Existing</strong>.</p>
+          <h2>Export, import and scripting</h2>
+          <p>You can save all your shortcuts to one file. <strong>Export…</strong> in <strong>Settings → Shortcuts</strong> writes a <kbd>.winkrecipe</kbd>; <strong>Import…</strong> reads one back. Before importing, Wink shows which shortcuts are <strong>Ready</strong>, which <strong>Conflicts</strong> and which are <strong>Unresolved</strong>. Then you choose <strong>Skip Conflicts</strong> or <strong>Replace Existing</strong>.</p>
           <p>Apple's Shortcuts app also discovers four localized Wink actions: <strong>Pause Wink</strong>, <strong>Resume Wink</strong>, <strong>Show Wink Search Palette</strong>, and <strong>Open Wink Settings</strong>. The Settings action can jump straight to Shortcuts, General, or Insights; Pause and Resume change only your manual pause, without overriding an exception app that is keeping capture paused.</p>
-          <p>Everything is also reachable from outside the app, on the <kbd>wink://</kbd> scheme:</p>
+          <p>Scripts and other apps can control Wink with the <kbd>wink://</kbd> URL scheme:</p>
           <div class="cli">
             <div><span class="ps">$</span> open -g "wink://toggle?bundle=com.google.Chrome"</div>
             <div><span class="ps">$</span> open -g "wink://focus?bundle=com.google.Chrome"</div>
@@ -607,52 +606,52 @@
             <div class="dim">wink://pause · wink://resume · wink://open-settings</div>
           </div>
           <p><kbd>focus</kbd> is idempotent: it brings an installed app forward but never hides it or cycles its windows when it is already frontmost. The only Settings tabs accepted are <kbd>shortcuts</kbd>, <kbd>general</kbd>, and <kbd>insights</kbd>.</p>
-          <p>Always call it with <kbd>open -g</kbd>. A plain <kbd>open</kbd> activates Wink to deliver the URL, which makes your actual target read as “not frontmost” and turns every toggle into a plain activate; <kbd>-g</kbd> keeps Wink in the background so the toggle sees the real frontmost state. Toggle requests respect the same per-bundle cooldown as a real keypress, but URL-triggered app actions never count toward Insights.</p>
+          <p>Always call it with <kbd>open -g</kbd>. A plain <kbd>open</kbd> activates Wink to deliver the URL, so your target app is no longer frontmost and every toggle becomes a plain activate. <kbd>-g</kbd> keeps Wink in the background so the toggle sees the real frontmost state. Toggle requests respect the same per-bundle cooldown as a real keypress, but URL-triggered app actions never count toward Insights.</p>
           <p>A custom URL scheme does not authenticate who called it. Wink accepts only the commands and parameters above, validates bundle identifiers against installed apps, and ignores malformed or unknown input. There are no <kbd>callback</kbd>, <kbd>x-success</kbd>, or other completion callbacks: successful URL delivery does not prove that macOS completed the asynchronous activation request.</p>
         </article>
 
 
         <!-- 10 -->
         <article class="chapter" id="troubleshooting">
-          <p class="eyebrow">10 · when a chord does nothing</p>
-          <h2>Nothing happened. Here's why.</h2>
-          <p>A shortcut that does nothing means one of three things, and they are not the same problem. Capture may be <strong>paused</strong> — on purpose. macOS may have withdrawn a <strong>permission</strong>. Or the <strong>route</strong> that shortcut travels may not be ready. The menu bar pill names the first kind outright — <strong>Paused</strong>, <strong>Limited · Secure Input</strong> — but it does not watch permissions or Carbon registration, so <strong>Ready</strong> does not clear those. When the pill reads Ready and a chord still does nothing, go by <em>which</em> shortcuts died.</p>
+          <p class="eyebrow">10 · troubleshooting</p>
+          <h2>When a shortcut does nothing</h2>
+          <p>There are three possible causes, and each has a different fix. Capture may be <strong>paused</strong> on purpose. macOS may have withdrawn a <strong>permission</strong>. Or the <strong>route</strong> the shortcut uses may not be ready. The menu bar pill shows the first case (<strong>Paused</strong>, <strong>Limited · Secure Input</strong>), but it does not check permissions or Carbon registration, so <strong>Ready</strong> does not rule those out. If the pill reads Ready and a shortcut still does nothing, look at <em>which</em> shortcuts stopped working.</p>
           <div class="list">
             <div class="list-row">
               <span class="term">the pill says Paused</span>
-              <span class="desc">Nothing failed — capture is off on purpose, and every shortcut stops while it is. Either you paused Wink from the menu bar, or the frontmost app is on your <strong>“Pause in exception apps”</strong> list (VMs and remote desktops ship there by default), in which case the pill names it: <strong>Paused · Parallels Desktop</strong>. Resume from the menu bar, or take the app off the list. No permission or route troubleshooting will change anything while this reads Paused.</span>
+              <span class="desc">Nothing is broken. Capture is off on purpose, and all shortcuts stop while it is. Either you paused Wink from the menu bar, or the frontmost app is on your <strong>“Pause in exception apps”</strong> list (VMs and remote desktops are on it by default). In that case the pill shows the app's name: <strong>Paused · Parallels Desktop</strong>. Resume from the menu bar, or take the app off the list. Checking permissions or routes will not help while the pill reads Paused.</span>
             </div>
             <div class="list-row">
-              <span class="term">only some shortcuts died</span>
-              <span class="desc">Whatever died shares a transport. Plain modifier chords (<kbd>⌃⌥K</kbd>) ride Carbon hot keys. Hyper chords ride the event tap. Fn-row bindings are a hybrid: Carbon delivers the press, and a narrow observer — which needs <strong>Input Monitoring</strong> — confirms the physical Fn key; either half stopping kills them. So: if the pill reads <strong>Limited · Secure Input</strong>, an app is holding Secure Input, both the tap and the Fn observer are starved, and it clears itself. If Hyper <em>and</em> Fn-row chords died together, check <strong>Input Monitoring</strong> in System Settings → Privacy &amp; Security — that one <em>is</em> a permission, and it feeds both. If <em>only</em> Fn-row chords died while Hyper still works, either half can be the culprit — a Carbon refusal, or the Fn observer failing to start (Hyper rides a different tap, so it survives that). The diagnostics export lists each failed binding with its reason, and an unavailable observer names itself there.</span>
+              <span class="term">only some shortcuts stopped</span>
+              <span class="desc">The shortcuts that stopped use the same route. Plain modifier shortcuts (<kbd>⌃⌥K</kbd>) use Carbon hot keys. Hyper shortcuts use the event tap. Fn-row bindings use both: Carbon delivers the key press, and a small observer, which needs <strong>Input Monitoring</strong>, confirms the physical Fn key. If either part stops, they stop. If the pill reads <strong>Limited · Secure Input</strong>, an app is holding Secure Input, which blocks both the event tap and the Fn observer. This clears by itself. If Hyper <em>and</em> Fn-row shortcuts stopped together, check <strong>Input Monitoring</strong> in System Settings → Privacy &amp; Security, since both depend on it. If <em>only</em> Fn-row shortcuts stopped while Hyper still works, the cause is either a Carbon registration failure or the Fn observer not starting (Hyper uses a different tap, so it is not affected). The diagnostics export lists each failed binding with its reason, and an unavailable observer names itself there.</span>
             </div>
             <div class="list-row">
-              <span class="term">all of them died</span>
-              <span class="desc">Match the remedy to what your shortcuts ride, not to the count. If everything you bound lives on the Hyper layer or Fn-row keys, one revoked <strong>Input Monitoring</strong> takes out all of it — check that first, same path as above. Plain modifier chords ride Carbon through <strong>Accessibility</strong>: check it in System Settings → Privacy &amp; Security, and if Wink is listed and switched on, switch it <strong>off and on again</strong> — a stale grant looks identical to a live one from the outside. For certainty instead of guessing, the diagnostics export above names each route's readiness directly.</span>
+              <span class="term">all shortcuts stopped</span>
+              <span class="desc">Look at which routes your shortcuts use. If all of them are on the Hyper layer or Fn-row keys, a revoked <strong>Input Monitoring</strong> permission stops all of them, so check that first (same path as above). Plain modifier shortcuts use Carbon through <strong>Accessibility</strong>. Check it in System Settings → Privacy &amp; Security. If Wink is listed and switched on, switch it <strong>off and on again</strong>, because an outdated grant looks the same as a working one. The diagnostics export shows whether each route is ready.</span>
             </div>
             <div class="list-row">
               <span class="term">after an update</span>
-              <span class="desc">macOS ties a permission to the app's signature, not its name or path. A build signed differently from the one you granted is a different app as far as TCC is concerned, and both permissions have to be granted again. Being notarized does not change this — notarization is about Gatekeeper letting the app open, TCC is about what it may do afterwards. They are separate, and the diagnostics export names the signing mode so you can tell which build you are running.</span>
+              <span class="desc">macOS ties a permission to the app's signature, not its name or path. A build signed differently from the one you granted is a different app as far as TCC is concerned, and both permissions have to be granted again. Notarization does not change this: notarization decides whether Gatekeeper lets the app open, and TCC decides what it may do after that. They are separate, and the diagnostics export names the signing mode so you can tell which build you are running.</span>
             </div>
             <div class="list-row">
               <span class="term">only in one app</span>
-              <span class="desc">That app is probably holding Secure Input — a password field, a lock screen, a remote-desktop session. The pill reads <strong>Limited · Secure Input</strong> and it clears itself. If the app is a VM or remote desktop you use for long stretches, add it under <strong>“Pause in exception apps”</strong> instead of fighting it.</span>
+              <span class="desc">That app is probably holding Secure Input, for example in a password field, a lock screen or a remote-desktop session. The pill reads <strong>Limited · Secure Input</strong> and it clears itself. If the app is a VM or remote desktop you use for long stretches, add it under <strong>“Pause in exception apps”</strong>.</span>
             </div>
             <div class="list-row">
               <span class="term">the app moved or is gone</span>
-              <span class="desc">Wink binds to a bundle identifier, not a path, so moving an app is fine. Deleting it is not: the row stays and reports the app as unavailable, so nothing fires silently into a gap.</span>
+              <span class="desc">Wink binds to a bundle identifier, not a path, so moving an app is fine. If you delete the app, its row stays and shows the app as unavailable.</span>
             </div>
           </div>
-          <p class="lead-chips">If none of that explains it, take the evidence with you:</p>
+          <p class="lead-chips">If none of this explains the problem, export a diagnostics report:</p>
           <p><strong>Settings → General → Diagnostics</strong> has <strong>Reveal Log</strong> and <strong>Export…</strong>. The export shows you every file and everything in it <em>before</em> anything is written, and nothing leaves the Mac unless you send it.</p>
-          <p>Your user name, home folder path, passwords, tokens, and the query strings on any web address are removed. Application names and bundle identifiers are <em>kept</em> — they are what makes the report worth reading, and they do reveal which apps you have shortcuts for. Read the preview before you share it.</p>
+          <p>Your user name, home folder path, passwords, tokens, and the query strings on any web address are removed. Application names and bundle identifiers are <em>kept</em>, because the report is not useful without them. They do show which apps you have shortcuts for. Read the preview before you share it.</p>
           <p>When you file something, the useful report is short: Wink's version, your macOS version, what you pressed and what you expected, which kind of shortcut it was, and the export attached.</p>
         </article>
 
         <!-- closing -->
         <section class="closing" id="extras">
-          <p class="eyebrow">Also, briefly</p>
-          <h2>A few more things.</h2>
+          <p class="eyebrow">Other settings</p>
+          <h2>Updates, login and language</h2>
           <div class="list">
             <div class="list-row">
               <span class="term">updates</span>
@@ -664,11 +663,11 @@
             </div>
             <div class="list-row">
               <span class="term">languages</span>
-              <span class="desc">English and 简体中文 today, set from System Settings → General → Language &amp; Region — more are on the way.</span>
+              <span class="desc">English and 简体中文. Choose the language in System Settings → General → Language &amp; Region.</span>
             </div>
             <div class="list-row">
               <span class="term">help</span>
-              <span class="desc">Wink is open source. Read the code, file something, or just watch it get built — on GitHub.</span>
+              <span class="desc">Wink is open source. The code, issue tracker and development history are on GitHub.</span>
             </div>
           </div>
         </section>
@@ -676,8 +675,8 @@
         <!-- final cross-link -->
         <div class="guide-cta">
           <p class="eyebrow">Get Wink</p>
-          <h2>End of the manual.</h2>
-          <p class="sub">The rest is muscle memory. Free, open source, macOS 15 or later.</p>
+          <h2>Download Wink</h2>
+          <p class="sub">Free and open source, for macOS 15 or later.</p>
           <a class="btn btn-primary btn-2l" href="/#download"><span>Download for macOS</span><span class="btn-sub">free · open source · direct DMG</span></a>
         </div>
 
@@ -702,7 +701,7 @@
       <a href="https://github.com/xrf9268-hue/Wink/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
       <a href="https://github.com/xrf9268-hue/Wink/blob/main/docs/privacy.md" rel="noopener">Privacy</a>
     </nav>
-    <p class="tagline">made for people who'd rather not reach for the mouse</p>
+    <p class="tagline">for people who prefer the keyboard to the mouse</p>
   </div>
 </footer>
 

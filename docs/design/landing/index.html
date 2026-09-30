@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Wink gives every app on your Mac its own keystroke. Turn Caps Lock into a Hyper key — press once to summon, again to dismiss. Free, open source, macOS 15+.">
+<meta name="description" content="Wink is a menu-bar app that gives each app on your Mac its own keyboard shortcut. Caps Lock becomes a Hyper key: press a shortcut to bring an app forward, press it again to hide it. Free and open source, for macOS 15 or later.">
 <meta name="color-scheme" content="light dark">
-<title>Wink — One chord, one destination</title>
+<title>Wink: keyboard shortcuts for your apps</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cmask id='m'%3E%3Crect width='32' height='32' fill='white'/%3E%3Ccircle cx='15' cy='9' r='11' fill='black'/%3E%3C/mask%3E%3Ccircle cx='16' cy='16' r='11' fill='%23FFB454' mask='url(%23m)'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -658,17 +658,16 @@
   <section class="hero">
     <div class="wrap">
       <div class="hero-copy">
-        <p class="dict"><span class="word">wink</span> <span class="ipa">/wɪŋk/</span> · <em>verb</em> — a quick close of one eye, as a signal</p>
         <h1>One chord.<br><span class="dest">One destination.</span></h1>
-        <p class="sub">Wink gives every app on your Mac its own keystroke. <strong>Caps&nbsp;Lock becomes a Hyper key</strong>, and 26 letters become 26 destinations. Press to summon. Press again to dismiss.</p>
+        <p class="sub">Wink gives each app on your Mac its own keyboard shortcut. <strong>Caps&nbsp;Lock becomes a Hyper key</strong>, so each letter can open a different app. Press the shortcut to bring the app forward, and press it again to hide it.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary btn-2l" href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener"><span>Download for macOS</span><span class="btn-sub">free · open source · direct DMG</span></a>
           <a class="btn btn-ghost btn-2l" href="https://github.com/xrf9268-hue/Wink" rel="noopener"><span>View on GitHub</span><span class="btn-sub">open source · Swift 6</span></a>
         </div>
         <div class="hstats">
-          <div class="hstat"><b>26</b><span>letters — plus F-keys, arrows &amp; Space</span></div>
-          <div class="hstat"><b>0</b><span>thumbnails — Screen Recording never asked</span></div>
-          <div class="hstat"><b>1</b><span>key remapped — Caps&nbsp;Lock, reborn</span></div>
+          <div class="hstat"><b>26</b><span>letter keys, plus F-keys, arrows and Space</span></div>
+          <div class="hstat"><b>0</b><span>thumbnails, so no Screen Recording permission</span></div>
+          <div class="hstat"><b>1</b><span>key remapped: Caps&nbsp;Lock</span></div>
         </div>
       </div>
 
@@ -724,7 +723,7 @@
           <div class="keycol"><button class="keycap" type="button" data-key="t">T</button><span class="key-label">Terminal</span></div>
           <div class="keycol"><button class="keycap" type="button" data-key="n">N</button><span class="key-label">Notes</span></div>
         </div>
-        <p class="scene-hint">click a key<span class="desktop-only"> — or just type <b>S</b>, <b>T</b>, <b>N</b></span></p>
+        <p class="scene-hint">click a key<span class="desktop-only">, or type <b>S</b>, <b>T</b> or <b>N</b></span></p>
       </div>
     </div>
   </section>
@@ -733,7 +732,7 @@
   <section class="interlude">
     <div class="wrap">
       <span class="eyebrow">Why Wink</span>
-      <p><span class="quiet">A switcher shows you every window, then asks you to choose.</span><br>Wink skips the question — <mark>you already knew where you were going.</mark></p>
+      <p><span class="quiet">A window switcher shows every open window and waits for you to pick one.</span><br>In Wink, each app has a fixed shortcut, <mark>so you go straight to the app you want.</mark></p>
     </div>
   </section>
 
@@ -741,14 +740,14 @@
   <section class="section" id="film">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">In motion</p>
-        <h2>Twenty-four seconds, start to finish.</h2>
-        <p class="lede">Summon and dismiss, walk the windows, hold to choose, type two letters, hold ⇪ for the map — the whole idea, in one loop.</p>
+        <p class="eyebrow">Overview</p>
+        <h2>The main features in 24 seconds</h2>
+        <p class="lede">Bring an app forward and hide it, cycle its windows, hold to pick a window, find an app by typing two letters, and hold ⇪ to see every shortcut.</p>
       </div>
       <figure class="film">
         <video autoplay muted loop playsinline preload="metadata" poster="/media/wink-film-poster.png" src="/media/wink-film.mp4" width="1920" height="1080" aria-label="Animated walkthrough: Caps Lock becomes Hyper; Hyper+S summons and dismisses Safari; repeated Hyper+T cycles Terminal windows including a minimized one; holding Hyper+S opens the window picker; the search palette finds Figma in two letters; holding Caps Lock shows the keyboard map"></video>
       </figure>
-      <p class="film-caption">drawn in code, frame by frame · every chord in it ships today</p>
+      <p class="film-caption">an animation, not a screen recording · every feature shown is in the current release</p>
     </div>
   </section>
 
@@ -757,13 +756,13 @@
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">The map</p>
-        <h2>Hold ⇪ and the whole map appears.</h2>
-        <p class="lede">Forget a binding? Hold the Hyper key: every shortcut you've taught Wink overlays your keyboard, and vanishes when you let go. Muscle memory, with training wheels that disappear.</p>
+        <h2>Hold ⇪ to see all your shortcuts</h2>
+        <p class="lede">If you forget a shortcut, hold the Hyper key. Wink shows every enabled shortcut in an overlay and hides it when you let go.</p>
       </div>
       <div class="kbwrap">
         <div class="kb" id="kb" aria-label="Keyboard map of app shortcuts"></div>
       </div>
-      <p class="kb-caption">this map is an example — yours will look like you · psst: your real ⇪ works on this page</p>
+      <p class="kb-caption">example bindings · hold your real ⇪ to try it on this page</p>
     </div>
   </section>
 
@@ -772,16 +771,16 @@
     <div class="wrap">
 
       <div class="section-head">
-        <p class="eyebrow">The system</p>
-        <h2>One idea, five depths.</h2>
-        <p class="lede">Summon and dismiss is day one. The rest reveals itself as you need it — numbered here in the order it'll find you.</p>
+        <p class="eyebrow">Features</p>
+        <h2>Beyond showing and hiding apps</h2>
+        <p class="lede">Showing and hiding apps is the basic feature. The others are listed roughly in the order you are likely to need them.</p>
       </div>
 
       <div class="show" style="padding-top: 24px;">
         <div class="show-copy">
           <p class="eyebrow">01 · cycle</p>
-          <h3>Press again.<br>Walk the windows.</h3>
-          <p>Repeat the chord and Wink steps through that app's windows — <strong>minimized ones included</strong>, which <kbd>⌘`</kbd> never manages. A HUD keeps count so you're never lost. And one chord can cycle whatever app you're in, wherever you are.</p>
+          <h3>Cycle through an app's windows</h3>
+          <p>Press the shortcut again and Wink moves to the app's next window, <strong>including minimized ones</strong>, which <kbd>⌘`</kbd> skips. A small HUD shows which window you are on. You can also set one shortcut that cycles the windows of whichever app is in front.</p>
         </div>
         <div class="show-mock">
           <div class="cyc" aria-hidden="true">
@@ -807,15 +806,15 @@
       <div class="show rev">
         <div class="show-copy">
           <p class="eyebrow">02 · the picker</p>
-          <h3>Hold, and choose for yourself.</h3>
-          <p>Keep the chord held and that app's windows appear as a list — <strong>icons and titles, never thumbnails.</strong> That restraint is deliberate: it's why Wink works without Screen Recording, and always will.</p>
+          <h3>Hold to pick a window</h3>
+          <p>Hold the shortcut down and Wink lists that app's windows. The list shows <strong>icons and titles, not thumbnails,</strong> which is why Wink does not need the Screen Recording permission.</p>
         </div>
         <div class="show-mock">
           <div class="pick" aria-hidden="true">
             <div class="pick-row" data-pick="0"><span class="app-dot" style="background:#3D7FC4">S</span>Docs — Swift.org<span class="ret">⏎</span></div>
             <div class="pick-row" data-pick="1"><span class="app-dot" style="background:#3D7FC4">S</span>Pull Requests — GitHub<span class="ret">⏎</span></div>
             <div class="pick-row" data-pick="2"><span class="app-dot" style="background:#3D7FC4">S</span>Release notes<span class="ret">⏎</span></div>
-            <p class="pick-cap">holding ⇪S — ↑↓ choose · ⏎ switches</p>
+            <p class="pick-cap">holding ⇪S · ↑↓ to choose · ⏎ to switch</p>
           </div>
         </div>
       </div>
@@ -823,8 +822,8 @@
       <div class="show">
         <div class="show-copy">
           <p class="eyebrow">03 · search to switch</p>
-          <h3>Two letters for everything else.</h3>
-          <p>Some apps don't earn a key of their own. Summon the palette, type two letters, hit <kbd>⏎</kbd> — Wink takes you there. <strong>Every app is reachable, even the ones you never bound.</strong></p>
+          <h3>Search for apps without a shortcut</h3>
+          <p>For apps you use less often, open the search palette, type the first letters of the name and press <kbd>⏎</kbd>. <strong>This works for any app, including ones with no shortcut.</strong></p>
         </div>
         <div class="show-mock">
           <div class="pal" aria-hidden="true">
@@ -836,9 +835,9 @@
 
       <div class="show rev" id="insights">
         <div class="show-copy">
-          <p class="eyebrow">04 · insights — local only</p>
-          <h3>It keeps score. Locally.</h3>
-          <p>Activations, streaks, time saved, your peak hours — kept in a SQLite file on your Mac and never uploaded anywhere. When an unbound app starts earning a key, <strong>Wink notices and suggests the binding.</strong></p>
+          <p class="eyebrow">04 · insights · local only</p>
+          <h3>Usage stats, stored on your Mac</h3>
+          <p>Wink records activations, streaks, time saved and your busiest hours in a SQLite file on your Mac. Nothing is uploaded. If you often switch to an app that has no shortcut, <strong>Wink suggests adding one.</strong></p>
         </div>
         <div class="show-mock">
           <div class="ins" aria-hidden="true">
@@ -855,7 +854,7 @@
             </div>
             <div class="toast">
               <span class="app-dot" style="background:#8A63D2">F</span>
-              <span class="msg"><b>Figma — 47 switches this week</b><span>No shortcut yet — give it a key?</span></span>
+              <span class="msg"><b>Figma: 47 switches this week</b><span>No shortcut yet. Add one?</span></span>
               <span class="acts"><span class="mini-btn pri">Suggested</span></span>
             </div>
           </div>
@@ -865,14 +864,14 @@
       <div class="show">
         <div class="show-copy">
           <p class="eyebrow">05 · quiet by design</p>
-          <h3>It knows when to stay quiet.</h3>
-          <p>A password field grabs Secure Input? The menu bar says so, and your ordinary modifier chords keep firing — the Caps&nbsp;Lock layer and Fn-row keys wait it out. Working inside a VM or remote desktop? Per-app rules pause your chords automatically. And scripts can drive everything through the <kbd>wink://</kbd> scheme.</p>
+          <h3>Pausing, Secure Input and scripting</h3>
+          <p>When a password field turns on Secure Input, the menu bar shows it. Shortcuts that use ordinary modifiers keep working, while the Caps&nbsp;Lock layer and Fn-row keys wait until Secure Input ends. Per-app rules pause your shortcuts automatically inside a VM or remote desktop app. Scripts can control Wink through the <kbd>wink://</kbd> URL scheme.</p>
         </div>
         <div class="show-mock">
           <div class="quiet-stack" aria-hidden="true">
-            <div class="sec-banner"><span class="sig">!</span>Limited · Secure&nbsp;Input — Hyper resumes when it ends</div>
+            <div class="sec-banner"><span class="sig">!</span>Limited · Secure&nbsp;Input · Hyper resumes when it ends</div>
             <div class="rule-row"><span class="app-dot" style="background:#C24B4B">P</span>Parallels Desktop<span class="chip-state">auto-pause · on</span></div>
-            <div class="cli"><div><span class="ps">$</span> open -g "wink://toggle?bundle=com.figma.Desktop"</div><div class="dim">wink://pause · wink://resume — same idea</div></div>
+            <div class="cli"><div><span class="ps">$</span> open -g "wink://toggle?bundle=com.figma.Desktop"</div><div class="dim">wink://pause and wink://resume work the same way</div></div>
           </div>
         </div>
       </div>
@@ -885,28 +884,28 @@
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Also in the box</p>
-        <h2>The rest of it, briefly.</h2>
+        <h2>Other features</h2>
       </div>
       <div class="list">
         <div class="list-row">
           <span class="term">frontmost behaviors</span>
-          <span class="desc"><span class="chips"><span class="chip">Hide</span><span class="chip">Toggle</span><span class="chip">Focus</span><span class="chip is-on">Cycle</span></span>&nbsp; — what a repeat press does. A global default, overridable per shortcut.</span>
+          <span class="desc"><span class="chips"><span class="chip">Hide</span><span class="chip">Toggle</span><span class="chip">Focus</span><span class="chip is-on">Cycle</span></span>&nbsp; What a second press does. Set a global default and override it per shortcut.</span>
         </div>
         <div class="list-row">
           <span class="term">.winkrecipe</span>
-          <span class="desc">Your whole setup as one file. Version it, share it with your team, import it on a new Mac.</span>
+          <span class="desc">Export your setup as a single file to keep in version control, share with others, or import on another Mac.</span>
         </div>
         <div class="list-row">
           <span class="term">简体中文</span>
-          <span class="desc">Wink speaks English and Simplified Chinese, with more languages on the way.</span>
+          <span class="desc">Wink is available in English and Simplified Chinese.</span>
         </div>
         <div class="list-row">
           <span class="term">hyper, standard, or both</span>
-          <span class="desc">Bind on the Hyper layer under Caps&nbsp;Lock, or on ordinary modifier combos — letters, F-keys, arrows and Space.</span>
+          <span class="desc">Use the Hyper layer on Caps&nbsp;Lock, ordinary modifier combinations, or both. Letters, F-keys, arrows and Space can all be bound.</span>
         </div>
         <div class="list-row">
           <span class="term">set &amp; forget</span>
-          <span class="desc">Launch at Login, signed updates that install from inside the app, and pause-all one click away in the menu bar.</span>
+          <span class="desc">Launch at Login, signed updates installed from inside the app, and a pause-all switch in the menu bar.</span>
         </div>
       </div>
     </div>
@@ -916,16 +915,16 @@
   <div class="wrap">
     <div class="principles">
       <div class="principle">
-        <h3>No Screen Recording. Ever.</h3>
-        <p>Window pickers and cycling are built on the Accessibility API — titles and icons, never thumbnails. That permission will never be requested.</p>
+        <h3>No Screen Recording permission</h3>
+        <p>The window picker and window cycling use the Accessibility API and show titles and icons, not thumbnails. Wink does not request Screen Recording.</p>
       </div>
       <div class="principle">
-        <h3>Local-first.</h3>
-        <p>No account, no cloud, no telemetry. Your usage data lives in a SQLite file you can delete any time; the only network calls are update checks.</p>
+        <h3>Data stays on your Mac</h3>
+        <p>There is no account, cloud sync or telemetry. Usage data is kept in a SQLite file you can delete at any time. The only network requests are update checks.</p>
       </div>
       <div class="principle">
-        <h3>MIT licensed.</h3>
-        <p>Swift 6, SwiftUI, built in the open on GitHub. Read every line before you trust it with your keyboard.</p>
+        <h3>MIT license</h3>
+        <p>Wink is written in Swift 6 and SwiftUI. The full source code is on GitHub.</p>
       </div>
     </div>
   </div>
@@ -938,12 +937,12 @@
         <circle cx="14" cy="16" r="11" fill="currentColor" mask="url(#wm3)"/>
         <circle class="eye-open" cx="46" cy="16" r="9" fill="currentColor"/>
       </svg>
-      <h2>Your Mac, one keystroke away.</h2>
+      <h2>Download Wink</h2>
       <div class="ctas">
         <a class="btn btn-primary btn-2l" href="https://github.com/xrf9268-hue/Wink/releases/latest" rel="noopener"><span>Download for macOS</span><span class="btn-sub">free · macOS 15 (Sequoia) or later</span></a>
         <a class="btn btn-ghost btn-2l" href="https://github.com/xrf9268-hue/Wink/blob/main/CHANGELOG.md" rel="noopener"><span>Changelog</span><span class="btn-sub">what's new</span></a>
       </div>
-      <p class="meta">keeps itself updated · signed update feed · delete one file and it never existed</p>
+      <p class="meta">automatic updates · signed update feed · uninstall by deleting the app</p>
       <p class="fine">Needs Accessibility to route shortcuts. Input Monitoring is requested only if you turn on the Hyper layer or Fn-row bindings. Current v0.7.5 is not notarized by Apple. After a blocked first launch, use System Settings → Privacy &amp; Security → Open Anyway if you trust the download.</p>
     </div>
   </section>
@@ -966,7 +965,7 @@
       <a href="https://github.com/xrf9268-hue/Wink/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
       <a href="https://github.com/xrf9268-hue/Wink/blob/main/docs/privacy.md" rel="noopener">Privacy</a>
     </nav>
-    <p class="tagline">made for people who'd rather not reach for the mouse</p>
+    <p class="tagline">for people who prefer the keyboard to the mouse</p>
   </div>
 </footer>
 
