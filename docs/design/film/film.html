@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wink Film</title>
+<!--
+  Wink landing film — a 24 s seamless loop drawn entirely in code.
+  Every visual is a pure function of time: seek(t) computes the whole frame,
+  there are no CSS transitions or animations, so any t renders identically in
+  the preview and in tools/render.mjs. Open this file directly to preview:
+  space = play/pause, ←/→ = step 1 frame (shift: 1 s), ?t=12.3 = freeze.
+-->
+<style>
+  :root {
+    --bg: #0A0D14;
+    --surface: #131826;
+    --surface-2: #1A2132;
+    --text: #E9EDF6;
+    --muted: #98A3BD;
+    --hairline: rgba(152, 163, 189, 0.16);
+    --accent: #FFB454;
+    --accent-soft: rgba(255, 180, 84, 0.13);
+    --term-bg: #0E121C;
+    --term-text: #C9D2E4;
+    --ok: #4CAF6E;
+    --mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #05070B; height: 100%; overflow: hidden; }
+  body { color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+  #stage {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+    overflow: hidden; transform-origin: 0 0;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(1200px 700px at 50% 38%, rgba(255, 180, 84, 0.055), transparent 70%),
+      radial-gradient(rgba(152, 163, 189, 0.09) 1.4px, transparent 1.4px);
+    background-size: auto, 26px 26px;
+  }
+  .abs { position: absolute; }
+
+  /* ---------- menu bar ---------- */
+  #menubar {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 44px;
+    display: flex; align-items: center; gap: 14px; padding: 0 22px;
+    background: rgba(19, 24, 38, 0.78); border-bottom: 1px solid var(--hairline);
+    font-family: var(--mono); font-size: 16px; color: var(--muted);
+    z-index: 50;
+  }
+  #menubar .name { color: var(--text); font-weight: 700; }
+  #menubar .right { margin-left: auto; display: flex; gap: 22px; align-items: center; }
+  #menubar .ready { color: var(--accent); }
+
+  /* ---------- desktop ---------- */
+  #desk { position: absolute; inset: 0; }
+  .win {
+    position: absolute; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
+    transform-origin: 50% 60%;
+  }
+  .bar { height: 46px; display: flex; align-items: center; gap: 14px; padding: 0 18px; border-bottom: 1px solid var(--hairline); background: #171D2C; }
+  .dots { display: flex; gap: 8px; }
+  .dots i { width: 13px; height: 13px; border-radius: 50%; display: block; }
+  .dots i:nth-child(1) { background: #E0655F; } .dots i:nth-child(2) { background: #E0A33E; } .dots i:nth-child(3) { background: #62B554; }
+  .wtitle { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; }
+  .url { flex: 1; max-width: 460px; margin: 0 auto; font-family: var(--mono); font-size: 13.5px; color: var(--muted); background: var(--surface-2); border-radius: 8px; padding: 5px 14px; text-align: center; white-space: nowrap; overflow: hidden; }
+  .nav { color: var(--muted); font-size: 18px; letter-spacing: 8px; }
+  .skl { height: 11px; border-radius: 6px; background: var(--surface-2); }
+  .t .bar { background: #151A26; border-bottom-color: rgba(255,255,255,0.05); }
+  .t { background: var(--term-bg); border-color: rgba(255,255,255,0.08); }
+  .term { font-family: var(--mono); font-size: 18px; line-height: 1.85; color: var(--term-text); padding: 20px 24px; white-space: pre; }
+  .term .ps { color: var(--accent); } .term .ok { color: var(--ok); } .term .dim { opacity: 0.5; }
+
+  .safari-body { padding: 34px 44px; display: flex; flex-direction: column; gap: 16px; }
+  .safari-body h4 { font-size: 34px; letter-spacing: -0.02em; font-weight: 700; }
+  .safari-body .kick { font-family: var(--mono); font-size: 14px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+  .card { height: 150px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--hairline); padding: 16px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; }
+  .rel { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; font-size: 17px; color: var(--muted); }
+  .rel b { color: var(--text); font-family: var(--mono); font-weight: 600; margin-right: 12px; }
+
+  .notes { display: grid; grid-template-columns: 200px 1fr; height: calc(100% - 46px); }
+  .notes .side { background: #161C2A; border-right: 1px solid var(--hairline); padding: 18px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 15px; color: var(--muted); }
+  .notes .side .on { background: rgba(232, 183, 48, 0.2); color: var(--text); border-radius: 8px; padding: 8px 10px; }
+  .notes .side span { padding: 8px 10px; }
+  .notes .doc { padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; font-size: 18px; color: var(--muted); }
+  .notes .doc h5 { font-size: 28px; color: var(--text); font-weight: 700; }
+
+  .figma { display: grid; grid-template-columns: 220px 1fr 240px; height: calc(100% - 46px); }
+  .figma .pane { background: #161B28; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .figma .canvas { background: #0F1320; position: relative; }
+  .frame { position: absolute; border-radius: 10px; }
+
+  /* ---------- dock ---------- */
+  #dock {
+    position: absolute; left: 50%; bottom: 16px; height: 96px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px; padding: 0 16px;
+    background: rgba(26, 33, 50, 0.72); border: 1px solid var(--hairline); border-radius: 26px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    z-index: 40;
+  }
+  .dk { position: relative; }
+  .dk .run { position: absolute; left: 50%; bottom: -9px; width: 5px; height: 5px; border-radius: 50%; background: var(--muted); transform: translateX(-50%); }
+  .sep { width: 1px; height: 60px; background: var(--hairline); margin: 0 4px; }
+  .mini-thumb { width: 88px; height: 62px; border-radius: 8px; background: var(--term-bg); border: 1px solid rgba(255,255,255,0.1); overflow: hidden; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .mini-thumb i { display: block; height: 5px; border-radius: 3px; background: rgba(201, 210, 228, 0.35); }
+
+  .icon {
+    width: 72px; height: 72px; border-radius: 17px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 700; font-size: 28px; color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .icon.sm { width: 34px; height: 34px; border-radius: 9px; font-size: 15px; }
+
+  #dim { position: absolute; inset: 0; background: #05070B; opacity: 0; z-index: 30; }
+
+  /* ---------- captions ---------- */
+  .cap {
+    position: absolute; left: 0; width: 1920px; top: 88px; text-align: center; z-index: 60;
+    font-family: var(--mono); font-weight: 700; font-size: 50px; letter-spacing: -0.035em; color: var(--text);
+    text-shadow: 0 4px 30px rgba(5, 7, 11, 0.9);
+  }
+  .cap em { font-style: normal; color: var(--accent); }
+  .cap small { display: block; margin-top: 12px; font-size: 21px; font-weight: 500; letter-spacing: 0.02em; color: var(--muted); }
+  #scrim { position: absolute; left: 0; top: 44px; width: 1920px; height: 240px; z-index: 55; background: linear-gradient(#0A0D14 10%, rgba(10,13,20,0.7) 55%, rgba(10,13,20,0)); }
+
+  /* ---------- keycast ---------- */
+  #keycast { position: absolute; right: 60px; bottom: 150px; z-index: 70; display: flex; gap: 10px; }
+  .kc {
+    min-width: 58px; height: 58px; padding: 0 16px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: 0 4px 0 #05070B;
+  }
+  .kc.hy { color: var(--accent); border-color: rgba(255,180,84,0.6); }
+
+  /* ---------- the morphing object ---------- */
+  #blob { position: absolute; left: 0; top: 0; overflow: hidden; z-index: 65; }
+  .layer { position: absolute; left: 50%; top: 50%; }
+  .layer.top { top: 0; }
+
+  /* switcher strip */
+  #L-strip { width: 1040px; height: 176px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+  #L-strip .icon { width: 84px; height: 84px; border-radius: 20px; font-size: 30px; position: relative; z-index: 1; }
+  #strip-sel { position: absolute; top: 30px; width: 116px; height: 116px; border-radius: 26px; background: rgba(255,255,255,0.13); border: 1px solid rgba(255,255,255,0.14); }
+  #strip-name { position: absolute; top: 150px; font-family: var(--sans); font-size: 15px; color: var(--muted); width: 200px; text-align: center; }
+
+  /* keycap */
+  #L-key { width: 168px; height: 168px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-family: var(--mono); }
+  #L-key .g { font-size: 64px; line-height: 1; font-weight: 600; }
+  #L-key .l { position: relative; height: 22px; width: 160px; font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  #L-key .l span { position: absolute; left: 0; right: 0; text-align: center; }
+  .skey {
+    position: absolute; z-index: 64; width: 168px; height: 168px; border-radius: 30px;
+    background: var(--surface-2); border: 1.5px solid var(--hairline);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 64px; font-weight: 600; color: var(--text);
+  }
+  .klabel { position: absolute; z-index: 64; width: 260px; text-align: center; font-family: var(--mono); font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  #plus { position: absolute; z-index: 64; font-family: var(--mono); font-size: 44px; color: var(--muted); }
+
+  /* HUD */
+  #L-hud { width: 660px; height: 76px; display: flex; align-items: center; gap: 18px; padding: 0 26px; font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chip { position: relative; padding: 5px 13px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 19px; }
+  .chip svg { position: absolute; left: -7px; top: -7px; }
+  .roll { position: relative; height: 30px; overflow: hidden; }
+  .roll > span { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  #hud-count { width: 86px; font-weight: 700; }
+  #hud-title { flex: 1; color: var(--muted); }
+
+  /* picker */
+  #L-pick { width: 680px; height: 360px; padding: 18px; font-family: var(--sans); }
+  .pk-head { display: flex; align-items: center; gap: 12px; padding: 6px 12px 14px; font-size: 18px; font-weight: 600; border-bottom: 1px solid var(--hairline); }
+  .pk-head .n { margin-left: auto; font-family: var(--mono); font-size: 15px; color: var(--muted); font-weight: 500; }
+  .pk-rows { position: relative; margin-top: 10px; }
+  #pk-sel { position: absolute; left: 0; right: 0; height: 64px; border-radius: 12px; background: var(--accent-soft); border: 1px solid rgba(255,180,84,0.35); }
+  .pk-row { position: relative; height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 14px; font-size: 20px; }
+  .pk-row .ret { margin-left: auto; font-family: var(--mono); font-size: 17px; color: var(--accent); }
+  .pk-foot { position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-family: var(--mono); font-size: 14.5px; color: var(--muted); letter-spacing: 0.03em; }
+
+  /* palette */
+  #L-pal { width: 760px; height: 330px; transform: translateX(-50%); font-family: var(--sans); }
+  .pq { height: 84px; display: flex; align-items: center; gap: 16px; padding: 0 28px; font-family: var(--mono); font-size: 30px; border-bottom: 1px solid var(--hairline); }
+  .pq .ph { color: rgba(152,163,189,0.55); }
+  .caret { width: 3px; height: 36px; background: var(--accent); border-radius: 2px; }
+  .pr { position: relative; height: 70px; display: flex; align-items: center; gap: 16px; padding: 0 28px; font-size: 21px; }
+  .pr b { color: var(--accent); font-weight: 700; }
+  .pr .ret { margin-left: auto; font-family: var(--mono); font-size: 17px; color: var(--muted); }
+  .pr.sel { background: var(--accent-soft); }
+  .pr.sel .ret { color: var(--accent); }
+
+  /* keyboard map */
+  #L-kb { width: 1280px; height: 470px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  .kr { display: flex; gap: 12px; }
+  .kk {
+    width: 84px; height: 84px; border-radius: 16px; flex: none;
+    background: var(--surface-2); border: 1.5px solid var(--hairline); box-shadow: 0 4px 0 #05070B;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--muted);
+  }
+  .kk .lb { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1; height: 11px; }
+  .kk.hyper { width: 176px; font-size: 17px; letter-spacing: 0.08em; }
+  .kk.space { width: 492px; }
+
+  /* end card */
+  #end { position: absolute; inset: 0; z-index: 80; }
+  #mark { position: absolute; left: 797px; top: 350px; width: 360px; height: 180px; overflow: visible; }
+  .title { position: absolute; left: 0; width: 1920px; text-align: center; font-family: var(--mono); font-weight: 700; font-size: 92px; letter-spacing: -0.05em; line-height: 1; }
+  .title.a { top: 600px; } .title.b { top: 708px; color: var(--accent); }
+  #endsub { position: absolute; left: 0; width: 1920px; top: 850px; text-align: center; font-family: var(--mono); font-size: 24px; color: var(--muted); letter-spacing: 0.02em; }
+
+  /* preview chrome (hidden when rendering) */
+  #ctl { position: fixed; left: 0; right: 0; bottom: 0; height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 14px; background: rgba(0,0,0,0.6); font: 13px var(--mono); color: #ccc; z-index: 999; }
+  #ctl input { flex: 1; }
+  body.render #ctl { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="desk">
+    <div id="menubar">
+      <svg width="34" height="17" viewBox="0 0 64 32" aria-hidden="true">
+        <mask id="mbm"><rect width="64" height="32" fill="#fff"/><circle cx="13" cy="9" r="11" fill="#000"/></mask>
+        <circle cx="14" cy="16" r="11" fill="#FFB454" mask="url(#mbm)"/>
+        <ellipse id="mb-eye" cx="46" cy="16" rx="9" ry="9" fill="#FFB454"/>
+      </svg>
+      <span class="name">Wink</span>
+      <span>File</span><span>Edit</span><span>View</span>
+      <span class="right"><span class="ready">⇪ ready</span><span>Mon 9:41</span></span>
+    </div>
+    <div id="wins"></div>
+    <div id="dock"></div>
+  </div>
+  <div id="dim"></div>
+  <div id="scrim"></div>
+  <div id="caps"></div>
+  <div id="keycast"></div>
+
+  <div id="plus">+</div>
+  <div class="skey" id="skey"><span id="skey-g">S</span></div>
+  <div class="klabel" id="hlabel">caps lock</div>
+  <div class="klabel" id="slabel">Safari</div>
+
+  <div id="blob">
+    <div class="layer" id="L-strip"><div id="strip-sel"></div><div id="strip-name"></div></div>
+    <div class="layer" id="L-key">
+      <span class="g">⇪</span>
+      <span class="l"><span id="kl-a">caps lock</span><span id="kl-b">hyper</span></span>
+    </div>
+    <div class="layer" id="L-hud">
+      <span class="chip" id="hud-chip">⇪T<svg width="0" height="0" id="hud-ring"></svg></span>
+      <span class="roll" id="hud-count"></span>
+      <span class="roll" id="hud-title"></span>
+    </div>
+    <div class="layer" id="L-pick">
+      <div class="pk-head"><span class="icon sm" style="background:linear-gradient(#5AA2EE,#2F6FC0)">S</span>Safari<span class="n">3 windows</span></div>
+      <div class="pk-rows" id="pk-rows"><div id="pk-sel"></div></div>
+      <div class="pk-foot">holding ⇪S — ↑↓ choose · ⏎ switches · no thumbnails, ever</div>
+    </div>
+    <div class="layer top" id="L-pal">
+      <div class="pq">
+        <svg width="30" height="30" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.6" stroke="#98A3BD" stroke-width="1.6"/><path d="M10.4 10.4 L14 14" stroke="#98A3BD" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span id="pq-text"></span><span class="caret" id="pq-caret"></span><span class="ph" id="pq-ph">Switch to…</span>
+      </div>
+      <div id="pr-list"></div>
+    </div>
+    <div class="layer" id="L-kb"></div>
+  </div>
+
+  <div id="end">
+    <svg id="mark" viewBox="0 0 64 32" aria-hidden="true">
+      <mask id="em"><rect x="-10" y="-10" width="84" height="52" fill="#fff"/><circle id="em-bite" cx="13" cy="9" r="0" fill="#000"/></mask>
+      <circle cx="14" cy="16" r="11" fill="#FFB454" mask="url(#em)"/>
+      <ellipse id="em-eye" cx="46" cy="16" rx="0" ry="0" fill="#FFB454"/>
+    </svg>
+    <div class="title a" id="ta">One chord.</div>
+    <div class="title b" id="tb">One destination.</div>
+    <div id="endsub">Wink — free &amp; open source · macOS 15+</div>
+  </div>
+</div>
+
+<div id="ctl"><button id="pp">pause</button><input id="scrub" type="range" min="0" max="24" step="0.0166667" value="0"><span id="tt">0.00</span></div>
+
+<script>
+"use strict";
+const DURATION = 24;
+
+/* ================= math ================= */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const E = {
+  lin: p => p,
+  io: p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
+  out: p => 1 - Math.pow(1 - p, 3),
+  in: p => p * p * p,
+  back: p => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
+};
+// Analytic under-damped spring step response (0 → 1), dt in seconds.
+function spring(dt, k = 260, z = 0.64) {
+  if (dt <= 0) return 0;
+  const w = Math.sqrt(k), wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * dt) * (Math.cos(wd * dt) + (z * w / wd) * Math.sin(wd * dt));
+}
+const mix = (a, b, p) => (Array.isArray(a) ? a.map((v, i) => lerp(v, b[i], p)) : lerp(a, b, p));
+// Keyframe track: [[time, props, ease-into-this-frame]]; holds outside the range.
+function track(t, frames) {
+  if (t <= frames[0][0]) return { ...frames[0][1] };
+  for (let i = 1; i < frames.length; i++) {
+    const [t1, v1, e] = frames[i];
+    if (t <= t1) {
+      const [t0, v0] = frames[i - 1];
+      const p = E[e || "io"](seg(t, t0, t1));
+      const o = {};
+      for (const k in v1) o[k] = mix(v0[k], v1[k], p);
+      return o;
+    }
+  }
+  return { ...frames[frames.length - 1][1] };
+}
+// Fade window: 0 before a, ramps in over `fi`, holds, ramps out over `fo` ending at b.
+const win = (t, a, b, fi = 0.22, fo = 0.2) => Math.min(E.out(seg(t, a, a + fi)), 1 - E.in(seg(t, b - fo, b)));
+const rgba = c => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${c[3].toFixed(3)})`;
+const $ = id => document.getElementById(id);
+const setHTML = (el, html) => { if (el.__h !== html) { el.innerHTML = html; el.__h = html; } };
+
+/* ================= content ================= */
+const APPS = {
+  finder:   ["F",  "linear-gradient(#6FB4F5,#2F72C9)", "Finder"],
+  safari:   ["S",  "linear-gradient(#5AA2EE,#2F6FC0)", "Safari"],
+  terminal: [">_", "linear-gradient(#3A4152,#1B2030)", "Terminal"],
+  notes:    ["N",  "linear-gradient(#F4CF4E,#D9A21E)", "Notes"],
+  mail:     ["M",  "linear-gradient(#5DB0FF,#2D7BE0)", "Mail"],
+  calendar: ["C",  "linear-gradient(#F07A6E,#C9423D)", "Calendar"],
+  figma:    ["Fi", "linear-gradient(#A07BE6,#6E48C2)", "Figma"],
+  xcode:    ["X",  "linear-gradient(#6AA8F2,#3469C8)", "Xcode"],
+  zoom:     ["Z",  "linear-gradient(#4FA3FF,#1F6FE0)", "Zoom"],
+  music:    ["♪",  "linear-gradient(#FF6F7D,#D8364A)", "Music"],
+  messages: ["M",  "linear-gradient(#6BD58A,#2F9F52)", "Messages"],
+  slack:    ["#",  "linear-gradient(#C6559E,#7C2B6B)", "Slack"],
+};
+const icon = (k, cls = "") => `<span class="icon ${cls}" style="background:${APPS[k][1]}">${APPS[k][0]}</span>`;
+
+const WINS = {
+  build:  { x: 700, y: 262, w: 860, h: 520, cls: "t", title: "build — watch",
+            body: `<div class="term"><span class="ps">$</span> swift build --watch\n<span class="dim">Compiling Wink (214 files)</span>\n<span class="ok">Build complete!</span> (2.14s)\n<span class="dim">watching Sources/ for changes…</span>\n<span class="dim">[09:40:12]</span> ShortcutManager.swift changed\n<span class="ok">Build complete!</span> (0.61s)</div>` },
+  api:    { x: 520, y: 330, w: 860, h: 520, cls: "t", title: "api — zsh",
+            body: `<div class="term"><span class="ps">$</span> npm run dev\n<span class="dim">> api@2.4.0 dev</span>\nlistening on <span class="ok">:3000</span>\n<span class="dim">GET  /health          200   3ms</span>\n<span class="dim">POST /v1/sessions     201  41ms</span>\n<span class="dim">GET  /v1/me           200   9ms</span></div>` },
+  deploy: { x: 400, y: 300, w: 860, h: 520, cls: "t", title: "ssh — deploy",
+            body: `<div class="term"><span class="ps">$</span> ssh prod\n<span class="dim">Last login: Mon 9:38 from 10.0.4.12</span>\ndeploy@prod:~$ ./release.sh 0.7.5\n<span class="ok">✓</span> signed  <span class="ok">✓</span> notarized  <span class="ok">✓</span> uploaded\n<span class="dim">feed updated · 3 mirrors</span></div>` },
+  safari: { x: 170, y: 250, w: 920, h: 620, cls: "", title: "",
+            body: null },
+  notes:  { x: 1110, y: 290, w: 640, h: 520, cls: "", title: "Notes",
+            body: `<div class="notes"><div class="side"><span class="on">Ideas</span><span>Release checklist</span><span>Reading list</span><span>Groceries</span></div><div class="doc"><h5>Ideas</h5><div>• one key per app, no hunting</div><div>• hold to see every window</div><div>• two letters for the rest</div><div class="skl" style="width:70%"></div><div class="skl" style="width:52%"></div></div></div>` },
+  figma:  { x: 300, y: 236, w: 1320, h: 660, cls: "", title: "Figma — Landing v3",
+            body: `<div class="figma"><div class="pane"><div class="skl" style="width:70%"></div><div class="skl" style="width:55%"></div><div class="skl" style="width:80%"></div><div class="skl" style="width:40%"></div></div><div class="canvas"><div class="frame" style="left:60px;top:60px;width:300px;height:420px;background:#1B2334;border:2px solid #A07BE6"></div><div class="frame" style="left:90px;top:100px;width:240px;height:40px;background:#FFB454;opacity:.85"></div><div class="frame" style="left:90px;top:160px;width:180px;height:14px;background:#3A4560"></div><div class="frame" style="left:400px;top:60px;width:300px;height:200px;background:#2A2F4A"></div><div class="frame" style="left:400px;top:290px;width:300px;height:190px;background:#263A34"></div></div><div class="pane"><div class="skl" style="width:60%"></div><div class="skl" style="width:85%"></div><div class="skl" style="width:50%"></div></div></div>` },
+};
+const SAFARI_A = { url: "swift.org/documentation", body: `<div class="safari-body"><span class="kick">Documentation</span><h4>Swift Documentation</h4><div class="skl" style="width:82%"></div><div class="skl" style="width:74%"></div><div class="skl" style="width:58%"></div><div class="cards"><div class="card"><div class="skl" style="width:70%"></div><div class="skl" style="width:45%"></div></div><div class="card"><div class="skl" style="width:60%"></div><div class="skl" style="width:50%"></div></div><div class="card"><div class="skl" style="width:75%"></div><div class="skl" style="width:40%"></div></div></div></div>` };
+const SAFARI_B = { url: "github.com/xrf9268-hue/Wink/releases", body: `<div class="safari-body"><span class="kick">Releases</span><h4>Wink 0.7.5</h4><div class="rel"><div><b>+</b>Hover stats on the insights heatmap</div><div><b>+</b>Signed &amp; notarized release pipeline</div><div><b>~</b>Faster cold start on login</div></div><div class="cards"><div class="card"><div class="skl" style="width:60%"></div></div><div class="card"><div class="skl" style="width:50%"></div></div><div class="card"><div class="skl" style="width:70%"></div></div></div></div>` };
+
+/* window events: [t, type, id]; state resets to INITIAL for t >= RESET (desk is invisible then) */
+const INITIAL_ORDER = ["build", "api", "safari", "notes"]; // back → front
+const EVENTS = [
+  [3.95, "raise", "safari"],
+  [4.85, "hide", "safari"],
+  [6.05, "raise", "build"], [6.05, "raise", "api"],
+  [7.6, "raise", "build"],
+  [8.6, "unmin", "deploy"],
+  [12.15, "show", "safari"],
+  [14.55, "show", "figma"],
+];
+const RESET = 22.9;
+const BLINKS = [3.95, 4.85, 6.05, 7.6, 8.6, 12.15, 14.55];
+
+const DOCK = ["finder", "safari", "terminal", "notes", "mail", "calendar", "figma", "slack", "music"];
+const STRIP = ["finder", "safari", "mail", "slack", "notes", "calendar", "music", "xcode", "figma", "terminal"];
+const STRIP_HOPS = [[0.85, 1], [1.08, 2], [1.31, 3], [1.54, 4], [1.77, 5], [2.0, 6], [2.22, 5], [2.42, 4]];
+
+const CAPTIONS = [
+  [0.55, 2.75, "A switcher shows you everything, <em>then asks.</em>"],
+  [2.95, 3.82, "Caps Lock becomes <em>Hyper.</em>"],
+  [3.95, 4.74, "⇪S — Safari, <em>summoned.</em>"],
+  [4.85, 5.9, "Again — <em>dismissed.</em>"],
+  [6.05, 7.48, "⇪T — Terminal, <em>front and center.</em>"],
+  [7.6, 8.5, "Press again. <em>Walk the windows.</em>"],
+  [8.6, 9.62, "<em>Minimized ones, too.</em>"],
+  [9.8, 12.25, "Hold, and <em>choose.</em>", "icons and titles — never thumbnails"],
+  [12.42, 15.05, "Two letters for <em>everything else.</em>", "⇪Space · search every app"],
+  [15.3, 18.3, "Hold ⇪ and <em>the whole map</em> appears."],
+];
+
+/* keycast: [t, keys[], hyper?] — each shows ~0.7 s */
+const KEYCAST = [
+  ...STRIP_HOPS.map(([t]) => [t - 0.03, ["⌘", "⇥"], false]),
+  [7.6, ["⇪", "T"], true], [8.6, ["⇪", "T"], true],
+  [9.8, ["⇪", "S", "hold"], true],
+  [11.1, ["↓"], false], [11.6, ["↓"], false], [12.12, ["⏎"], false],
+  [12.45, ["⇪", "Space"], true], [13.4, ["F"], false], [13.7, ["I"], false], [14.5, ["⏎"], false],
+  [15.35, ["⇪", "hold"], true],
+];
+
+const PICK_ROWS = ["Docs — Swift.org", "Pull Requests — GitHub", "Release notes — Wink"];
+const PICK_SEL = [[0, 0], [11.1, 1], [11.6, 2]];
+
+const PAL_RESULTS = {
+  f: [["figma", "F", "igma"], ["finder", "F", "inder"], ["messages", "F", "aceTime"]],
+  fi: [["figma", "Fi", "gma"], ["finder", "Fi", "nder"], ["music", "Fi", "nal Cut Pro"]],
+};
+
+const KB_ROWS = [
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+  ["⇪", "A", "S", "D", "F", "G", "H", "J", "K", "L"],
+  ["Z", "X", "C", "V", "B", "N", "M"],
+  ["space"],
+];
+const KB_BOUND = [["S", "Safari"], ["T", "Terminal"], ["N", "Notes"], ["M", "Mail"], ["C", "Calendar"], ["X", "Xcode"], ["Z", "Zoom"], ["space", "Search"]];
+
+/* ================= build DOM once ================= */
+const winEls = {};
+for (const id of ["build", "api", "deploy", "safari", "notes", "figma"]) {
+  const w = WINS[id];
+  const el = document.createElement("div");
+  el.className = "win " + w.cls;
+  el.style.cssText = `left:${w.x}px;top:${w.y}px;width:${w.w}px;height:${w.h}px;`;
+  if (id === "safari") {
+    el.innerHTML = `<div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="nav">‹ ›</span><span class="url" id="saf-url"></span></div><div id="saf-body"></div>`;
+  } else {
+    el.innerHTML = `<div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="wtitle"${w.cls ? ' style="color:#C9D2E4"' : ""}>${w.title}</span></div>${w.body}`;
+  }
+  $("wins").appendChild(el);
+  winEls[id] = el;
+}
+$("dock").innerHTML =
+  DOCK.map(k => `<span class="dk" data-k="${k}">${icon(k)}<i class="run" style="display:none"></i></span>`).join("") +
+  `<span class="sep"></span><span class="dk" id="dock-min"><span class="mini-thumb"><i style="width:60%"></i><i style="width:85%"></i><i style="width:45%"></i><i style="width:70%"></i></span></span>`;
+const dockRun = {};
+document.querySelectorAll("#dock .dk[data-k]").forEach(el => (dockRun[el.dataset.k] = el.querySelector(".run")));
+
+$("L-strip").insertAdjacentHTML("beforeend", STRIP.map(k => icon(k)).join(""));
+$("pk-rows").insertAdjacentHTML("beforeend", PICK_ROWS.map((r, i) => `<div class="pk-row">${icon("safari", "sm")}${r}<span class="ret" id="pk-ret${i}">⏎</span></div>`).join(""));
+$("L-kb").innerHTML = KB_ROWS.map((row, ri) =>
+  `<div class="kr" style="${ri === 2 ? "padding-left:140px;align-self:flex-start;margin-left:" + 0 + "px" : ""}">` +
+  row.map((k, ci) => {
+    const cls = k === "⇪" ? "kk hyper" : k === "space" ? "kk space" : "kk";
+    const g = k === "⇪" ? "⇪ hyper" : k === "space" ? "" : k;
+    return `<div class="${cls}" data-k="${k}" data-r="${ri}" data-c="${ci}"><span>${g}</span><span class="lb"></span></div>`;
+  }).join("") + `</div>`).join("");
+// Row 3 sits under S…; center the whole block by aligning row 3 to row 2's A key.
+document.querySelectorAll("#L-kb .kr")[2].style.cssText = "margin-right:" + (1040 - 7 * 84 - 6 * 12 - 188) + "px";
+const kbKeys = [...document.querySelectorAll("#L-kb .kk")];
+const kbBoundIndex = Object.fromEntries(KB_BOUND.map(([k, n], i) => [k, [i, n]]));
+kbKeys.forEach(el => { const b = kbBoundIndex[el.dataset.k]; if (b) el.querySelector(".lb").textContent = b[1]; });
+
+/* ================= state helpers ================= */
+function windowState(t) {
+  const order = [...INITIAL_ORDER];
+  const st = {
+    build: { vis: true }, api: { vis: true }, safari: { vis: true }, notes: { vis: true },
+    deploy: { vis: false, min: true }, figma: { vis: false },
+  };
+  let lastT = -1, prevFront = order[order.length - 1];
+  if (t < RESET) {
+    for (const [et, type, id] of EVENTS) {
+      if (et > t) break;
+      if (et !== lastT) prevFront = frontOf(order, st);
+      lastT = et;
+      const s = st[id];
+      if (type === "hide") { s.vis = false; s.hideT = et; }
+      else {
+        if (type === "show") { s.vis = true; s.showT = et; }
+        if (type === "unmin") { s.vis = true; s.min = false; s.unminT = et; }
+        if (type === "raise") s.raiseT = et;
+        order.splice(order.indexOf(id), 1);
+        order.push(id);
+      }
+    }
+  }
+  return { order, st, front: frontOf(order, st), prevFront, lastT };
+}
+function frontOf(order, st) {
+  for (let i = order.length - 1; i >= 0; i--) if (st[order[i]].vis || st[order[i]].hideT !== undefined && false) return order[i];
+  return null;
+}
+function lastBefore(list, t) { let v = null; for (const it of list) { if (it[0] <= t) v = it; else break; } return v; }
+
+/* ================= blob geometry ================= */
+const PANEL = [19, 24, 38, 0.95], KEYBG = [26, 33, 50, 1], AMB = [255, 180, 84, 1];
+const HL = [152, 163, 189, 0.22], AMB_B = [255, 180, 84, 0.85];
+const G = (cx, cy, w, h, r, bg, bc, glow, o, s) => ({ cx, cy, w, h, r, bg, bc, glow, o, s });
+const BLOB = [
+  [0.0,   G(960, 600, 1040, 176, 30, PANEL, HL, 0, 0, 0.94)],
+  [0.45,  G(960, 600, 1040, 176, 30, PANEL, HL, 0, 0, 0.94)],
+  [0.78,  G(960, 600, 1040, 176, 30, PANEL, HL, 0, 1, 1), "out"],
+  [2.6,   G(960, 600, 1040, 176, 30, PANEL, HL, 0, 1, 1)],
+  [3.2,   G(960, 640, 168, 168, 30, KEYBG, HL, 0, 1, 1)],
+  [3.38,  G(960, 640, 168, 168, 30, KEYBG, HL, 0, 1, 1)],
+  [3.75,  G(850, 640, 168, 168, 30, KEYBG, AMB_B, 1, 1, 1)],
+  [6.6,   G(850, 640, 168, 168, 30, KEYBG, AMB_B, 1, 1, 1)],
+  [7.2,   G(960, 900, 660, 76, 38, PANEL, HL, 0, 1, 1)],
+  [10.1,  G(960, 900, 660, 76, 38, PANEL, HL, 0, 1, 1)],
+  [10.75, G(960, 590, 680, 360, 22, PANEL, HL, 0, 1, 1)],
+  [12.25, G(960, 590, 680, 360, 22, PANEL, HL, 0, 1, 1)],
+  [12.9,  G(960, 470, 760, 84, 20, PANEL, HL, 0, 1, 1)],
+  [13.38, G(960, 470, 760, 84, 20, PANEL, HL, 0, 1, 1)],
+  [13.7,  G(960, 593, 760, 330, 20, PANEL, HL, 0, 1, 1), "out"],
+  [15.3,  G(960, 593, 760, 330, 20, PANEL, HL, 0, 1, 1)],
+  [15.95, G(960, 610, 1280, 470, 26, PANEL, HL, 0, 1, 1)],
+  [18.48, G(960, 610, 1280, 470, 26, PANEL, HL, 0, 1, 1)],
+  [18.82, G(960, 440, 180, 180, 90, PANEL, HL, 0, 1, 1)],
+  [18.99, G(960, 440, 180, 180, 90, AMB, AMB, 0.7, 1, 1)],
+  [19.2,  G(875.75, 440, 124, 124, 62, AMB, AMB, 0.3, 1, 1)],
+  [19.26, G(875.75, 440, 124, 124, 62, AMB, AMB, 0, 0, 1), "lin"],
+];
+const PRESSES = [3.95, 4.85, 6.05];
+function press(t) { // key travel 0..1
+  let v = 0;
+  for (const p of PRESSES) { const d = t - p; if (d >= -0.05 && d < 0.2) v = Math.max(v, d < 0 ? E.out((d + 0.05) / 0.05) : 1 - E.out(d / 0.2)); }
+  return v;
+}
+
+/* ================= render one frame ================= */
+function seek(t) {
+  t = ((t % DURATION) + DURATION) % DURATION;
+
+  /* ---- desk visibility (fades out for the end card, back in for the loop) ---- */
+  const deskO = t < 18.4 ? 1 : t < 23 ? 1 - E.io(seg(t, 18.4, 19.1)) : E.io(seg(t, 23.1, 23.75));
+  $("desk").style.opacity = deskO;
+
+  /* ---- windows ---- */
+  const ws = windowState(t);
+  ws.order.forEach((id, z) => {
+    const el = winEls[id], s = ws.st[id];
+    let o = 1, ty = 0, sc = 1, tx = 0;
+    if (!s.vis) {
+      if (s.hideT !== undefined) { const p = E.out(seg(t, s.hideT, s.hideT + 0.28)); o = 1 - p; ty = 26 * p; sc = 1 - 0.035 * p; }
+      else o = 0;
+    } else if (s.unminT !== undefined && t - s.unminT < 0.8) {
+      const p = spring(t - s.unminT, 200, 0.78), from = dockMinCenter();
+      const cx = WINS[id].x + WINS[id].w / 2, cy = WINS[id].y + WINS[id].h / 2;
+      tx = (from[0] - cx) * (1 - p); ty = (from[1] - cy) * (1 - p); sc = lerp(0.08, 1, p); o = clamp(p * 3);
+    } else if (s.showT !== undefined && t - s.showT < 0.8) {
+      const p = spring(t - s.showT, 240, 0.7); o = clamp((t - s.showT) / 0.18); ty = 22 * (1 - p); sc = lerp(0.965, 1, p);
+    } else if (s.raiseT !== undefined && t - s.raiseT < 0.7) {
+      const p = spring(t - s.raiseT, 300, 0.5); sc = lerp(0.985, 1, p);
+    }
+    const isFront = id === ws.front, wasFront = id === ws.prevFront;
+    const fp = ws.lastT < 0 ? 1 : E.out(seg(t, ws.lastT, ws.lastT + 0.22));
+    const b = lerp(wasFront ? 1 : 0.68, isFront ? 1 : 0.68, fp);
+    el.style.zIndex = z + 1;
+    el.style.opacity = o;
+    el.style.transform = `translate(${tx}px,${ty}px) scale(${sc})`;
+    el.style.filter = b < 0.999 ? `brightness(${b.toFixed(3)}) saturate(${lerp(0.8, 1, (b - 0.68) / 0.32).toFixed(3)})` : "none";
+  });
+  winEls.deploy.style.display = ws.st.deploy.vis ? "" : "none";
+  winEls.figma.style.display = ws.st.figma.vis || ws.st.figma.showT ? "" : "none";
+  const saf = t >= 12.15 && t < RESET ? SAFARI_B : SAFARI_A;
+  setHTML($("saf-url"), saf.url);
+  setHTML($("saf-body"), saf.body);
+  // dock: running dots + minimized tile
+  const running = { finder: 1, safari: 1, terminal: 1, notes: 1, mail: 1, figma: t >= 14.55 && t < RESET };
+  for (const k in dockRun) dockRun[k].style.display = running[k] ? "" : "none";
+  const minEl = $("dock-min");
+  const mp = ws.st.deploy.unminT !== undefined ? E.out(seg(t, ws.st.deploy.unminT, ws.st.deploy.unminT + 0.25)) : 0;
+  minEl.style.opacity = 1 - mp;
+  // menu-bar blink on every activation
+  let eye = 1;
+  for (const b of BLINKS) { const d = t - b; if (d >= 0 && d < 0.2) eye = Math.min(eye, 0.12 + 0.88 * Math.abs(1 - d / 0.1)); }
+  $("mb-eye").setAttribute("ry", (9 * eye).toFixed(2));
+
+  /* ---- dim ---- */
+  $("dim").style.opacity = t < 10.1 ? 0 : t < 15.2 ? 0.3 * E.io(seg(t, 10.1, 10.6)) : (0.3 + 0.35 * E.io(seg(t, 15.2, 15.9))) * (1 - E.io(seg(t, 18.4, 19.1)));
+
+  /* ---- captions ---- */
+  const capHTML = [];
+  for (const [a, b, main, sub] of CAPTIONS) {
+    if (t < a || t > b) continue;
+    const o = win(t, a, b, 0.22, 0.16), y = 16 * (1 - E.out(seg(t, a, a + 0.3)));
+    capHTML.push(`<div class="cap" style="opacity:${o.toFixed(3)};transform:translateY(${y.toFixed(1)}px)">${main}${sub ? `<small>${sub}</small>` : ""}</div>`);
+  }
+  $("caps").innerHTML = capHTML.join("");
+  $("scrim").style.opacity = deskO * (t < 18.4 ? 1 : 0);
+
+  /* ---- keycast ---- */
+  const kc = lastBefore(KEYCAST, t);
+  if (kc && t - kc[0] < 0.75) {
+    const d = t - kc[0], o = Math.min(E.out(seg(d, 0, 0.08)), 1 - E.in(seg(d, 0.55, 0.75)));
+    const pop = lerp(0.9, 1, spring(d, 500, 0.55));
+    $("keycast").innerHTML = kc[1].map((k, i) => `<span class="kc${kc[2] && i === 0 ? " hy" : ""}">${k}</span>`).join("");
+    $("keycast").style.opacity = o;
+    $("keycast").style.transform = `scale(${pop.toFixed(3)})`;
+  } else $("keycast").style.opacity = 0;
+
+  /* ---- blob ---- */
+  const g = track(t, BLOB), pr = press(t);
+  const keyness = seg(t, 3.0, 3.2) * (1 - seg(t, 6.6, 6.9));
+  const blob = $("blob");
+  blob.style.display = t > 19.3 ? "none" : "";
+  blob.style.left = g.cx - g.w / 2 + "px";
+  blob.style.top = g.cy - g.h / 2 + pr * 7 * keyness + "px";
+  blob.style.width = g.w + "px";
+  blob.style.height = g.h + "px";
+  blob.style.borderRadius = g.r + "px";
+  blob.style.background = rgba(g.bg);
+  blob.style.border = `1.5px solid ${rgba(g.bc)}`;
+  blob.style.opacity = g.o;
+  blob.style.transform = `scale(${g.s})`;
+  const edge = 7 * keyness * (1 - pr);
+  blob.style.boxShadow = `0 ${edge}px 0 #05070B, 0 0 0 ${10 * g.glow}px rgba(255,180,84,${(0.16 * g.glow).toFixed(3)}), 0 0 ${80 * g.glow}px rgba(255,180,84,${(0.25 * g.glow).toFixed(3)}), 0 30px 80px rgba(0,0,0,${(0.55 * g.o).toFixed(3)})`;
+
+  const layer = (id, o, extra = "") => { const el = $(id); el.style.opacity = o; el.style.display = o <= 0.001 ? "none" : ""; el.style.transform = (el.classList.contains("top") ? "translateX(-50%)" : "translate(-50%,-50%)") + extra; };
+
+  // strip
+  layer("L-strip", win(t, 0.5, 2.85, 0.25, 0.25));
+  const hop = lastBefore(STRIP_HOPS, t), prevHop = STRIP_HOPS[STRIP_HOPS.indexOf(hop) - 1];
+  const fromI = prevHop ? prevHop[1] : 0, toI = hop ? hop[1] : 0;
+  const hp = hop ? spring(t - hop[0], 700, 0.8) : 1;
+  const idx = lerp(fromI, toI, hp), stripLeft = (1040 - (10 * 84 + 9 * 16)) / 2;
+  $("strip-sel").style.left = stripLeft + idx * 100 - 16 + "px";
+  $("strip-name").style.left = stripLeft + idx * 100 + 42 - 100 + "px";
+  setHTML($("strip-name"), APPS[STRIP[Math.round(idx)]][2]);
+
+  // hyper keycap
+  layer("L-key", win(t, 3.0, 6.75, 0.2, 0.15));
+  const amberP = E.io(seg(t, 3.38, 3.75));
+  $("L-key").querySelector(".g").style.color = `rgb(${lerp(233, 255, amberP) | 0},${lerp(237, 180, amberP) | 0},${lerp(246, 84, amberP) | 0})`;
+  $("kl-a").style.opacity = 1 - amberP; $("kl-a").style.transform = `translateY(${-10 * amberP}px)`;
+  $("kl-b").style.opacity = amberP; $("kl-b").style.transform = `translateY(${10 * (1 - amberP)}px)`;
+  $("kl-b").style.color = "#FFB454";
+
+  // S / T key, plus, labels
+  const sIn = E.out(seg(t, 3.42, 3.8)), sOut = E.in(seg(t, 6.55, 6.9));
+  const sO = sIn * (1 - sOut);
+  const sk = $("skey");
+  sk.style.display = sO <= 0 ? "none" : "";
+  sk.style.left = lerp(1110, 1070, sIn) - 84 + "px";
+  sk.style.top = 640 - 84 + pr * 7 + lerp(0, 60, sOut) + "px";
+  sk.style.opacity = sO;
+  sk.style.boxShadow = `0 ${7 * (1 - pr)}px 0 #05070B${pr > 0 ? `, 0 0 0 ${8 * pr}px rgba(255,180,84,${(0.2 * pr).toFixed(3)})` : ""}`;
+  sk.style.borderColor = pr > 0.01 ? `rgba(255,180,84,${(0.3 + 0.6 * pr).toFixed(3)})` : "";
+  const flip = seg(t, 5.35, 5.65), flipS = Math.abs(Math.cos(flip * Math.PI));
+  setHTML($("skey-g"), flip < 0.5 ? "S" : "T");
+  $("skey-g").style.transform = `scaleY(${flipS.toFixed(3)})`;
+  $("plus").style.opacity = sO;
+  $("plus").style.left = 960 - 14 + "px"; $("plus").style.top = 640 - 30 + "px";
+  const lblO = Math.min(sO, win(t, 3.0, 6.7, 0.2, 0.2));
+  const hl = $("hlabel"); hl.style.opacity = t < 3.38 ? win(t, 3.0, 6.7) : lblO; hl.style.left = lerp(960, 850, E.io(seg(t, 3.38, 3.75))) - 130 + "px"; hl.style.top = 750 + "px";
+  setHTML(hl, amberP < 0.5 ? "caps lock" : "hyper"); hl.style.color = amberP >= 0.5 ? "#FFB454" : "";
+  hl.style.opacity = 0; // the keycap carries its own legend; keep label slot for the S/T key only
+  const sl = $("slabel"); sl.style.opacity = lblO; sl.style.left = lerp(1110, 1070, sIn) - 130 + "px"; sl.style.top = 750 + "px";
+  setHTML(sl, flip < 0.5 ? "Safari" : "Terminal");
+
+  // HUD
+  layer("L-hud", win(t, 6.95, 10.3, 0.25, 0.18));
+  const hudStates = [[0, "⇪T", "1 / 3", "api — zsh"], [7.6, "⇪T", "2 / 3", "build — watch"], [8.6, "⇪T", "3 / 3", "ssh — deploy <span style='color:#FFB454'>· was minimized</span>"], [9.78, "⇪S", "", "Safari · keep holding…"]];
+  const hs = lastBefore(hudStates, t), hsPrev = hudStates[hudStates.indexOf(hs) - 1];
+  const rp = hs[0] === 0 ? 1 : E.out(seg(t, hs[0], hs[0] + 0.22));
+  const roll = (from, to) => `${from != null && rp < 1 ? `<span style="transform:translateY(${-24 * rp}px);opacity:${1 - rp}">${from}</span>` : ""}<span style="transform:translateY(${24 * (1 - rp)}px);opacity:${rp}">${to}</span>`;
+  $("hud-count").innerHTML = roll(hsPrev && hsPrev[2], hs[2]);
+  $("hud-title").innerHTML = roll(hsPrev && hsPrev[3], hs[3]);
+  $("hud-count").style.width = hs[2] || (hsPrev && rp < 1) ? "86px" : "0px";
+  const chip = $("hud-chip");
+  chip.firstChild.nodeValue = hs[1];
+  const cp = [7.6, 8.6, 9.78].reduce((m, p) => { const d = t - p; return d >= 0 && d < 0.3 ? Math.max(m, 1 - d / 0.3) : m; }, 0);
+  chip.style.background = `rgba(255,180,84,${(0.13 + 0.5 * cp).toFixed(3)})`;
+  chip.style.color = cp > 0.5 ? "#1A1206" : "#FFB454";
+  // hold ring: the 300 ms tap-vs-hold deadline, drawn around the chip
+  const holdP = seg(t, 9.8, 10.1), ring = $("hud-ring");
+  if (t > 9.8 && t < 10.3) {
+    const w = chip.offsetWidth + 14, h = chip.offsetHeight + 14, per = 2 * (w + h - 4 * (h / 2)) + Math.PI * h;
+    ring.setAttribute("width", w); ring.setAttribute("height", h);
+    ring.innerHTML = `<rect x="1.5" y="1.5" width="${w - 3}" height="${h - 3}" rx="${(h - 3) / 2}" fill="none" stroke="#FFB454" stroke-width="3" stroke-dasharray="${per}" stroke-dashoffset="${per * (1 - holdP)}" stroke-linecap="round"/>`;
+  } else ring.innerHTML = "";
+
+  // picker
+  layer("L-pick", win(t, 10.45, 12.45, 0.25, 0.18));
+  const ps = lastBefore(PICK_SEL, t), psPrev = PICK_SEL[PICK_SEL.indexOf(ps) - 1];
+  const sp = ps[0] === 0 ? 1 : spring(t - ps[0], 420, 0.72);
+  const selI = lerp(psPrev ? psPrev[1] : 0, ps[1], sp);
+  $("pk-sel").style.top = selI * 64 + "px";
+  const commit = t >= 12.12 ? 1 - seg(t, 12.12, 12.4) : 0;
+  $("pk-sel").style.background = `rgba(255,180,84,${(0.13 + 0.4 * commit).toFixed(3)})`;
+  for (let i = 0; i < 3; i++) $("pk-ret" + i).style.opacity = clamp(1 - Math.abs(selI - i) * 2);
+
+  // palette
+  layer("L-pal", win(t, 12.7, 15.4, 0.22, 0.2));
+  const q = t < 13.4 ? "" : t < 13.7 ? "f" : "fi";
+  setHTML($("pq-text"), q);
+  $("pq-ph").style.display = q ? "none" : "";
+  $("pq-caret").style.opacity = (t > 13.35 && t < 14.0) || Math.floor(t * 1.9) % 2 === 0 ? 1 : 0;
+  if (q) {
+    const rs = PAL_RESULTS[q], rt = q === "f" ? 13.4 : 13.7;
+    const enter = q === "f" ? 1 : 1;
+    const flash = t >= 14.5 ? 1 - seg(t, 14.5, 14.8) : 0;
+    $("pr-list").innerHTML = rs.map(([k, m, rest], i) => {
+      const o = q === "f" ? E.out(seg(t, 13.42 + i * 0.05, 13.62 + i * 0.05)) : 1;
+      const dy = q === "f" ? 12 * (1 - o) : 0;
+      const bg = i === 0 && flash > 0 ? ` style="background:rgba(255,180,84,${(0.13 + 0.4 * flash).toFixed(3)});opacity:${o};transform:translateY(${dy}px)"` : ` style="opacity:${o};transform:translateY(${dy}px)"`;
+      return `<div class="pr${i === 0 ? " sel" : ""}"${bg}>${icon(k, "sm")}<span><b>${m}</b>${rest}</span><span class="ret">${i === 0 ? "⏎ switch" : "app"}</span></div>`;
+    }).join("");
+  } else setHTML($("pr-list"), "");
+
+  // keyboard map
+  const kbO = win(t, 15.6, 18.5, 0.2, 0.22);
+  layer("L-kb", kbO, ` scale(${lerp(1, 0.94, E.in(seg(t, 18.28, 18.5))).toFixed(3)})`);
+  if (kbO > 0) {
+    kbKeys.forEach(el => {
+      const r = +el.dataset.r, c = +el.dataset.c, k = el.dataset.k;
+      const d = 15.55 + (r * 0.05 + c * 0.03);
+      const ko = E.out(seg(t, d, d + 0.25));
+      let lift = 0, glow = 0;
+      const b = kbBoundIndex[k];
+      if (k === "⇪") glow = seg(t, 15.5, 15.8);
+      if (b) glow = E.out(seg(t, 16.25 + b[0] * 0.19, 16.45 + b[0] * 0.19));
+      if (b) { const d2 = t - (16.25 + b[0] * 0.19); lift = d2 > 0 ? 7 * spring(d2, 380, 0.45) : 0; }
+      if (k === "⇪") lift = -4 * glow; // held down
+      el.style.opacity = ko;
+      el.style.transform = `translateY(${(14 * (1 - ko) - lift).toFixed(2)}px)`;
+      el.style.borderColor = glow > 0 ? `rgba(255,180,84,${(0.2 + 0.7 * glow).toFixed(3)})` : "";
+      el.style.background = glow > 0 ? `rgba(255,180,84,${(0.14 * glow).toFixed(3)})` : "";
+      el.style.color = glow > 0.5 ? "#FFB454" : "";
+      el.style.boxShadow = `0 ${4 + (k === "⇪" ? -4 * glow : 3 * glow)}px 0 #05070B${glow > 0 ? `, 0 0 0 ${6 * glow}px rgba(255,180,84,${(0.13 * glow).toFixed(3)})` : ""}`;
+      el.querySelector(".lb").style.opacity = glow;
+    });
+  }
+
+  /* ---- end card ---- */
+  const endO = t < 19.15 ? 0 : t < 22.7 ? 1 : 1 - E.io(seg(t, 22.7, 23.2));
+  $("end").style.opacity = endO;
+  $("end").style.display = endO <= 0 ? "none" : "";
+  if (endO > 0) {
+    const bite = E.io(seg(t, 19.3, 19.75)) * 11;
+    $("em-bite").setAttribute("r", bite.toFixed(3));
+    const eyeIn = spring(t - 19.55, 300, 0.55);
+    let ey = eyeIn;
+    const bd = t - 21.35;
+    if (bd >= 0 && bd < 0.24) ey *= 0.08 + 0.92 * Math.abs(1 - bd / 0.12);
+    $("em-eye").setAttribute("rx", (9 * eyeIn).toFixed(3));
+    $("em-eye").setAttribute("ry", (9 * ey).toFixed(3));
+    const tl = (id, a) => { const p = E.out(seg(t, a, a + 0.5)); $(id).style.opacity = p; $(id).style.transform = `translateY(${28 * (1 - p)}px)`; };
+    tl("ta", 19.95); tl("tb", 20.2); tl("endsub", 20.7);
+  }
+}
+window.seek = seek;
+window.DURATION = DURATION;
+
+function dockMinCenter() {
+  const r = $("dock-min").getBoundingClientRect(), s = $("stage").getBoundingClientRect();
+  const k = 1920 / s.width;
+  return [(r.left - s.left + r.width / 2) * k, (r.top - s.top + r.height / 2) * k];
+}
+
+/* ================= preview harness ================= */
+const params = new URLSearchParams(location.search);
+if (params.has("render")) {
+  document.body.classList.add("render");
+  seek(0);
+} else {
+  const stage = $("stage");
+  const fit = () => { const s = Math.min(innerWidth / 1920, (innerHeight - 40) / 1080); stage.style.transform = `scale(${s})`; };
+  addEventListener("resize", fit); fit();
+  let playing = !params.has("t"), t = +(params.get("t") || 0), last = performance.now();
+  const scrub = $("scrub"), tt = $("tt"), pp = $("pp");
+  const show = () => { seek(t); scrub.value = t; tt.textContent = t.toFixed(2); pp.textContent = playing ? "pause" : "play"; };
+  const loop = now => { if (playing) { t = (t + (now - last) / 1000) % DURATION; } last = now; show(); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+  pp.onclick = () => (playing = !playing);
+  scrub.oninput = () => { playing = false; t = +scrub.value; };
+  addEventListener("keydown", e => {
+    if (e.key === " ") { playing = !playing; e.preventDefault(); }
+    if (e.key === "ArrowRight") { playing = false; t = Math.min(DURATION, t + (e.shiftKey ? 1 : 1 / 60)); }
+    if (e.key === "ArrowLeft") { playing = false; t = Math.max(0, t - (e.shiftKey ? 1 : 1 / 60)); }
+  });
+}
+</script>
+</body>
+</html>
