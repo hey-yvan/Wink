@@ -61,3 +61,22 @@ The page itself is regenerated with `scripts/generate-worker-site.py`.
 Every visual is original: the Wink mark, hand-built UI mocks, and letter tiles
 standing in for app icons. No third-party footage, fonts or music ships in the
 file. It is silent on purpose, because the landing page autoplays it muted.
+
+## Guide clips (compose)
+
+`tools/compose.mjs` turns the raw recordings from the `guide-media-pipeline`
+skill into the `/guide` videos (`guide-<clip>-vN.mp4`, 1600×1000, 60 fps). It
+uses the same approach as the film, where `compose.html` renders every frame
+as a pure function of `t`. Each frame gets the brand backdrop, the recording
+inside a rounded screen, an eased virtual camera (≤ ~2× so the 1× source stays
+sharp), keycast chips from `events.tsv`, and optional `cover` ranges that
+cross-fade over frames that must not be published.
+
+```bash
+node tools/compose.mjs ~/.cache/wink-guide-media/rec out/guide --stills   # one still per camera key + event
+node tools/compose.mjs ~/.cache/wink-guide-media/rec out/guide [clip ...]  # render
+```
+
+Per-clip trims, camera keys and covers are in `tools/guide-clips.json`.
+`tools/calibrate.py` checks how the event log lines up with a recording (the
+offset is normally ~0).

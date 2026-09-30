@@ -1762,7 +1762,7 @@ const guideHtml = `<!doctype html>
           </figure>
           <p>Click <strong>Add Shortcut</strong>. The shortcut works right away in every app. Press it once and Wink brings the target app forward, launching it first if it is not running. What a second press does depends on the frontmost behavior (chapter 03).</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-first-chord.mp4" width="1480" height="1000" aria-label="Pressing Hyper+S summons Safari, pressing again dismisses it"></video>
+            <video autoplay muted loop playsinline src="/media/guide-first-chord-v2.mp4" width="1600" height="1000" aria-label="Pressing Hyper+S summons Safari, pressing again dismisses it"></video>
             <figcaption>⇪S pressed three times: show Safari, hide it, show it again. Recorded from the released app.</figcaption>
           </figure>
           <p>The app list also has a <strong>Current App</strong> entry at the top. A shortcut bound to it acts on whichever app is frontmost, so you do not need a separate binding for each app.</p>
@@ -1799,7 +1799,7 @@ const guideHtml = `<!doctype html>
           <p>While Hyper Key is on, the key no longer works as Caps Lock. Tapping it by itself does nothing: no shortcut, no capital letters, no indicator light. Turn Hyper Key off to get normal Caps Lock back. If you release Caps Lock slightly before the letter, Wink still treats it as one shortcut, as long as the gap is under about 80 milliseconds.</p>
           <p>To see your shortcuts, hold Caps Lock for just over half a second without pressing another key. An overlay lists every enabled shortcut, Hyper or not, and closes when you let go. It requires Hyper Key to be on and at least one enabled Hyper shortcut. Settings notes this under the toggle.</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-cheatsheet.mp4" width="1480" height="1000" aria-label="Holding Caps Lock brings up the cheat sheet overlay listing every shortcut"></video>
+            <video autoplay muted loop playsinline src="/media/guide-cheatsheet-v2.mp4" width="1600" height="1000" aria-label="Holding Caps Lock brings up the cheat sheet overlay listing every shortcut"></video>
             <figcaption>Hold ⇪ a little longer than for a shortcut to show the overlay.</figcaption>
           </figure>
         </article>
@@ -1810,13 +1810,13 @@ const guideHtml = `<!doctype html>
           <h2>Cycle through an app's windows</h2>
           <p>Set a shortcut's frontmost behavior to <strong>Cycle</strong> (chapter 03), then press the shortcut again while its app is frontmost. Each press moves to the next window, including minimized ones. A small HUD shows your position and the window title (<kbd>2/5</kbd> · window title) on the display where that window is.</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-cycle.mp4" width="1480" height="1000" aria-label="Repeating Hyper+T steps through Terminal windows while a HUD counts along"></video>
+            <video autoplay muted loop playsinline src="/media/guide-cycle-v2.mp4" width="1600" height="1000" aria-label="Repeating Hyper+T steps through Terminal windows while a HUD counts along"></video>
             <figcaption>⇪T pressed repeatedly. The HUD counts the windows, including minimized ones.</figcaption>
           </figure>
           <p>If the app has one window or none, there is nothing to cycle. A shortcut for a specific app then behaves like Toggle and hides the app. A Current App shortcut does nothing, so it never hides the app you are working in.</p>
           <p>To pick a window from a list instead, choose <strong>Hold Action → Window Picker</strong> in the shortcut row's ⋯ menu. Then hold the shortcut instead of tapping it. A list of the app's windows appears, with minimized windows marked. Use ↑↓ to choose and ⏎ to switch. The list shows icons and titles, not thumbnails, which is why Wink does not need Screen Recording.</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-picker.mp4" width="1480" height="1000" aria-label="Holding Hyper+S opens a window list, arrow keys choose, Return focuses"></video>
+            <video autoplay muted loop playsinline src="/media/guide-picker-v2.mp4" width="1600" height="1000" aria-label="Holding Hyper+S opens a window list, the down arrow picks a window, Return raises it"></video>
             <figcaption>Hold ⇪S, then use ↑↓ and ⏎. The list shows titles and icons.</figcaption>
           </figure>
         </article>
@@ -1827,7 +1827,7 @@ const guideHtml = `<!doctype html>
           <h2>Switch to an app by searching</h2>
           <p>Set a shortcut for the palette in <strong>Settings → General → Search Palette</strong>. You record it the same way as any other shortcut. Press it, type a few letters of an app's name (localized names also match) and press <kbd>⏎</kbd>. Wink switches to the app, launching it first if it is not running.</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-palette.mp4" width="1480" height="1000" aria-label="The search palette opens, safa is typed, Return switches to Safari"></video>
+            <video autoplay muted loop playsinline src="/media/guide-palette-v2.mp4" width="1600" height="1000" aria-label="The search palette opens, safa is typed, Return switches to Safari"></video>
             <figcaption>⇪Space, type “safa”, press ⏎. Safari comes back from hidden.</figcaption>
           </figure>
           <p>Before you type anything, the list shows recently used apps first, so the app you just left is usually at the top. Background agents and helper processes are not listed.</p>
@@ -2510,7 +2510,7 @@ const guideZhHtml = `<!doctype html>
           </figure>
           <p>点击<strong>添加快捷键</strong>后，快捷键立即在所有应用中生效。按一次，Wink 会把目标应用带到前台；应用未运行时会先启动它。再按一次的效果取决于前台行为设置（见第 03 章）。</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-first-chord.mp4" width="1480" height="1000" aria-label="按下 Hyper+S 唤出 Safari，再按一次收起"></video>
+            <video autoplay muted loop playsinline src="/media/guide-first-chord-v2.mp4" width="1600" height="1000" aria-label="按下 Hyper+S 唤出 Safari，再按一次收起"></video>
             <figcaption>⇪S 连按三次：唤出、收起、再唤出。录制自正式版本。</figcaption>
           </figure>
           <p>应用列表顶部有一项<strong>当前应用</strong>。绑定到它的快捷键会作用于当前在前台的应用，不必为每个应用分别绑定。</p>
@@ -2547,7 +2547,7 @@ const guideZhHtml = `<!doctype html>
           <p>Hyper 键开启期间，这个键不再具有 Caps Lock 功能。单独按一下不会有任何效果：不触发快捷键，不切换大写，指示灯也不亮。关闭 Hyper 键即可恢复 Caps Lock。如果 Caps Lock 比字母键稍早松开，只要间隔在大约 80 毫秒以内，Wink 仍会识别为同一个快捷键。</p>
           <p>想查看已绑定的快捷键，可以单独按住 Caps Lock 半秒多。浮层会列出所有已启用的快捷键（包括非 Hyper 的），松手后关闭。此功能需要开启 Hyper 键，并且至少有一个已启用的 Hyper 快捷键。设置中开关下方有相应说明。</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-cheatsheet.mp4" width="1480" height="1000" aria-label="按住 Caps Lock 后出现列出所有快捷键的速查表浮层"></video>
+            <video autoplay muted loop playsinline src="/media/guide-cheatsheet-v2.mp4" width="1600" height="1000" aria-label="按住 Caps Lock 后出现列出所有快捷键的速查表浮层"></video>
             <figcaption>按住 ⇪ 的时间比按快捷键稍长，浮层就会出现。</figcaption>
           </figure>
         </article>
@@ -2558,13 +2558,13 @@ const guideZhHtml = `<!doctype html>
           <h2>轮换应用的窗口</h2>
           <p>把某个快捷键的前台行为设为<strong>轮换</strong>（第 03 章），然后在该应用位于前台时再次按快捷键。每按一次切换到下一个窗口，最小化的窗口也包括在内。HUD 会在该窗口所在的显示器上显示当前位置和窗口标题（<kbd>2/5</kbd> · 窗口标题）。</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-cycle.mp4" width="1480" height="1000" aria-label="重复按 Hyper+T 依次切换 Terminal 窗口，HUD 显示位置"></video>
+            <video autoplay muted loop playsinline src="/media/guide-cycle-v2.mp4" width="1600" height="1000" aria-label="重复按 Hyper+T 依次切换 Terminal 窗口，HUD 显示位置"></video>
             <figcaption>连续按 ⇪T。HUD 显示当前位置，最小化的窗口也会轮到。</figcaption>
           </figure>
           <p>如果应用只有一个窗口或没有窗口，就无法轮换。这时，绑定具体应用的快捷键会按切换处理，隐藏该应用；绑定到当前应用的快捷键则不做任何操作，以免把你正在使用的应用隐藏。</p>
           <p>如果想从列表中选择窗口，可以在快捷键所在行的 ⋯ 菜单中选择<strong>长按动作 → 窗口选择器</strong>，之后长按快捷键即可。屏幕上会列出该应用的窗口，最小化的窗口带有标记。用 ↑↓ 选择，按 ⏎ 切换。列表只显示图标和标题，不显示缩略图，因此 Wink 不需要屏幕录制权限。</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-picker.mp4" width="1480" height="1000" aria-label="长按 Hyper+S 打开窗口列表，方向键选择，回车聚焦"></video>
+            <video autoplay muted loop playsinline src="/media/guide-picker-v2.mp4" width="1600" height="1000" aria-label="长按 Hyper+S 打开窗口列表，方向键选择，回车聚焦"></video>
             <figcaption>长按 ⇪S，再用 ↑↓ 和 ⏎。列表显示标题和图标。</figcaption>
           </figure>
         </article>
@@ -2575,7 +2575,7 @@ const guideZhHtml = `<!doctype html>
           <h2>搜索并切换应用</h2>
           <p>在<strong>设置 → 通用 → 搜索面板</strong>中为面板设置快捷键，录制方式与其他快捷键相同。按下后输入应用名称的前几个字母（也可以匹配本地化名称），再按 <kbd>⏎</kbd>。Wink 会切换到该应用；应用未运行时会先启动它。</p>
           <figure class="fig">
-            <video autoplay muted loop playsinline src="/media/guide-palette.mp4" width="1480" height="1000" aria-label="搜索面板打开，输入 safa，回车切换到 Safari"></video>
+            <video autoplay muted loop playsinline src="/media/guide-palette-v2.mp4" width="1600" height="1000" aria-label="搜索面板打开，输入 safa，回车切换到 Safari"></video>
             <figcaption>⇪Space，输入“safa”，按 ⏎。已隐藏的 Safari 回到前台。</figcaption>
           </figure>
           <p>还没输入内容时，列表把最近切换过的应用排在前面，刚离开的应用通常就在第一位。后台代理和辅助进程不会出现在列表中。</p>

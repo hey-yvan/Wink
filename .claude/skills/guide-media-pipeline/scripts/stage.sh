@@ -8,6 +8,9 @@ BACKUP="$WORK/backup-$(date +%Y%m%d-%H%M%S)"
 APPSUP="$HOME/Library/Application Support/Wink"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 mkdir -p "$WORK" "$BACKUP"
+# Stage display origin (global x). The right-hand display is the stage;
+# record-clips.sh must use the same value.
+SX="${WINK_STAGE_X:-1920}"
 
 # Refuse to stage over a live user session: step 5 creates and closes
 # Safari and Terminal windows, which must never eat real work. Quit them
@@ -82,6 +85,12 @@ echo "backup: $BACKUP"
 # 2. demo config + synthetic usage, app in English
 pkill -x Wink || true; sleep 0.6
 cp "$HERE/demo-shortcuts.json" "$APPSUP/shortcuts.json"
+# 0.7.5+ keeps shortcuts in Profiles/ and treats shortcuts.json as a
+# read-only mirror: writing the mirror alone is ignored (the gate sees the
+# user's real count). With Profiles/ gone, launch runs the first-run
+# migration and imports the demo file as the Default profile. The original
+# Profiles/ is in $BACKUP/AppSupport and restore.sh puts it back whole.
+rm -rf "$APPSUP/Profiles"
 python3 "$HERE/make-demo-usage.py" "$WORK/demo-usage.db"
 cp "$WORK/demo-usage.db" "$APPSUP/usage.db"
 defaults write com.wink.app AppleLanguages -array en
@@ -131,6 +140,15 @@ esac
 [ -s "$WORK/wink-wallpaper.png" ] || { echo "ABORT: wallpaper render produced no PNG" >&2; exit 1; }
 osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$WORK/wink-wallpaper.png\""
 killall WallpaperAgent 2>/dev/null || true
+# macOS 26+ ignores `set picture` for dynamic/landscape wallpapers, so the
+# stage would still show the user's desktop. Cover the stage display with a
+# click-through desktop-level window instead (restore.sh kills it).
+if [ ! -x "$WORK/backdrop" ] || [ "$HERE/backdrop.swift" -nt "$WORK/backdrop" ]; then
+  swiftc -O "$HERE/backdrop.swift" -o "$WORK/backdrop"
+fi
+pkill -x backdrop 2>/dev/null || true
+nohup "$WORK/backdrop" "$WORK/wink-wallpaper.png" "$SX" >/dev/null 2>&1 &
+sleep 1
 # record whether PomoFox was running before pausing it — restore.sh must
 # not hand back a session with an app the user never had open
 if pgrep -xq PomoFox; then
@@ -138,6 +156,8 @@ if pgrep -xq PomoFox; then
   pkill -x PomoFox 2>/dev/null || true
   echo "PomoFox paused for the shoot"
 fi
+
+python3 "$HERE/make-term-scenes.py" "$WORK"
 
 # 5. stage Safari (3 windows, one minimized) and Terminal (3, one minimized).
 # The preflight only proves neither app is RUNNING — Resume (or Safari's
@@ -157,17 +177,6 @@ tell application "Safari"
       end if
     end repeat
   end repeat
-  close every window
-  make new document with properties {URL:"https://wink.aixie.de"}
-  delay 1
-  make new document with properties {URL:"https://wink.aixie.de/guide"}
-  delay 1
-  make new document with properties {URL:"https://github.com/xrf9268-hue/Wink"}
-  delay 2
-  set bounds of window 3 to {320, 120, 1600, 960}
-  set bounds of window 2 to {360, 160, 1640, 1000}
-  set bounds of window 1 to {400, 200, 1680, 1040}
-  set miniaturized of window 3 to true
 end tell
 EOF
 then
@@ -177,31 +186,14 @@ then
   echo "set Safari opens with 'A new window'), quit it again, then re-run stage.sh." >&2
   exit 1
 fi
+# Only demo-owned windows can exist now: build the storyboard's three pages
+# (order and cache-busting explained in stage-safari.applescript).
+osascript "$HERE/stage-safari.applescript" "$SX"
 # The resume preflight up top rules out a Resume-restored single window,
 # so one window here is Terminal's own fresh launch window; more than one
 # means something restored anyway — abort without touching them.
-if ! osascript <<'EOF'
-tell application "Terminal"
-  launch
-  delay 1
-  if (count of windows) > 1 then error "saved windows restored at launch"
-  close every window
-  delay 0.5
-  do script ""
-  delay 0.5
-  do script ""
-  delay 0.5
-  do script ""
-  delay 1
-  set custom title of window 3 to "api — zsh"
-  set custom title of window 2 to "build — watch"
-  set custom title of window 1 to "deploy — ssh"
-  set bounds of window 3 to {380, 180, 1450, 780}
-  set bounds of window 2 to {430, 230, 1500, 830}
-  set bounds of window 1 to {480, 280, 1550, 880}
-  set miniaturized of window 3 to true
-end tell
-EOF
+mkdir -p "$WORK/stage/api" "$WORK/stage/build" "$WORK/stage/deploy"
+if ! osascript "$HERE/stage-terminal.applescript" "$SX" "$WORK"
 then
   osascript -e 'tell application "Terminal" to quit' 2>/dev/null || true
   echo "ABORT: Terminal restored saved windows at launch — staging would destroy" >&2

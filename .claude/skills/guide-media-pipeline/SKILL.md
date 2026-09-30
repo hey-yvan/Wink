@@ -6,8 +6,11 @@ description: Reproducible pipeline for the /guide demo videos and Settings scree
 # Guide Media Pipeline
 
 Everything at `wink.aixie.de/media/*` (five demo videos, twelve Settings
-screenshots) was produced by this pipeline on 2026-07-23. It is fully
-scripted so a UI change means re-running it, not re-doing it by hand.
+screenshots) was produced by this pipeline. The screenshots date from
+2026-07-23. The videos were re-shot on 2026-09-30 as `guide-*-v2.mp4`,
+recorded on the right-hand display and composited into 1600×1000
+product-style clips. The pipeline is fully scripted, so a UI change means
+re-running it, not re-doing it by hand.
 
 ## Hard preconditions
 
@@ -15,17 +18,23 @@ scripted so a UI change means re-running it, not re-doing it by hand.
   injects global keystrokes, drives the frontmost app, changes system
   appearance, swaps the wallpaper, and records the screen. The machine
   must be hands-off during recording windows (announce them).
-- One display whose current Space is **empty** (the stage). Scripts
-  assume it spans `0,0,1920x1080`; adjust the geometry constants if the
-  layout changed (`winlist`-style CGWindowList dumps tell you).
+- One 1920×1080 display whose current Space is **empty** (the stage). By
+  default this is the **right-hand display at x=1920**, so the user's own
+  terminal can stay on the main display. Override it with
+  `WINK_STAGE_X=<origin x>` for both `stage.sh` and `record-clips.sh`, and
+  check the layout with a CGWindowList dump. `shoot-settings.sh` still
+  assumes the main display for the Settings window.
 - TCC for the terminal host: Accessibility (CGEvent posting + System
   Events UI scripting) and Screen Recording (`screencapture`). Grants
   persist per host app; a first run may prompt.
 - `wrangler` OAuth able to write bucket `wink-releases` (no S3 keys
   needed) and `ffmpeg` on PATH.
-- Google Chrome at `/Applications/Google Chrome.app` — it renders the
-  brand wallpaper headlessly; staging aborts without it rather than
-  record (and upload) the user's personal wallpaper.
+- Google Chrome at `/Applications/Google Chrome.app`, which renders the
+  brand wallpaper headlessly. Staging aborts without it rather than record
+  (and upload) the user's personal wallpaper. The wallpaper is shown by
+  `backdrop` (see gotcha 12), not by the system wallpaper setting.
+- `docs/design/film/node_modules` (Playwright). `encode-and-upload.sh`
+  installs it on first run.
 - Wink installed at `/Applications/Wink.app` — record the SHIPPED build,
   never a dev build.
 
@@ -47,7 +56,12 @@ All scripts live in `scripts/` next to this file. Work dir defaults to
    saved session. Works on a never-launched install (the config dir is
    initialized before backup). **Verifies `shortcuts=4
    triggerIndex=4` in `~/.config/Wink/debug.log` before returning.**
-2. `record-clips.sh` — records the five clips (~2 min hands-off).
+2. `record-clips.sh` records the five clips (about 2 minutes, hands off)
+   and writes `rec/events.tsv`, a timestamp for every injected input.
+   Before each clip it hides the app that isn't the subject. Before
+   recording, probe the cheat sheet once (hold ⇪ via `winkkeys f19 1800`
+   and list Wink's windows with CGWindowList) to confirm that panels open
+   on the stage display.
 3. Screenshot matrix — for each locale × theme, relaunch/switch then
    `shoot-settings.sh <suffix>`:
    ```
@@ -64,8 +78,15 @@ All scripts live in `scripts/` next to this file. Work dir defaults to
    Palette queries must resolve to STAGED apps only — a broad query
    surfaces the user's real installed apps (a "term" query once launched
    the user's Termius).
-5. `encode-and-upload.sh` — crops/encodes the clips and uploads all
-   media to `wink-releases` under `wink/guide/`.
+5. `encode-and-upload.sh <vN>` composites the clips with
+   `docs/design/film/tools/compose.mjs`: brand backdrop, rounded screen,
+   eased camera push-ins onto Wink's UI, keycast chips, and a cross-fade
+   over the palette's leak window. It then uploads them as
+   `guide-<clip>-<vN>.mp4`. Camera keys, trims and cover ranges live in
+   `tools/guide-clips.json`. If pacing or UI positions move, re-measure:
+   diff a frame before and after each panel appears, **decoding at a
+   constant frame rate** (gotcha 16). Review with `compose.mjs --stills`
+   before rendering.
 6. `restore.sh <backup-dir>` — restores config, defaults, language,
    wallpaper, PomoFox (only if it was running before staging), quits
    staged apps, relaunches Wink. **Never skip
@@ -116,3 +137,33 @@ All scripts live in `scripts/` next to this file. Work dir defaults to
 10. Cycling un-minimizes windows and clip order mutates window state —
     each clip's script re-establishes its own pre-state; don't reorder
     clips without re-checking pre-states.
+11. **Wink 0.7.5+ stores shortcuts in `Profiles/`.** `shortcuts.json` is
+    only a mirror, and writing it has no effect: the staging gate then
+    reports the user's real count. `stage.sh` removes `Profiles/` so
+    launch migrates the demo file in, and `restore.sh` puts the backed-up
+    `Profiles/` back verbatim. Diff it against the backup afterwards.
+12. **`set picture of desktop` silently does nothing** against macOS 26's
+    dynamic and landscape wallpapers. `backdrop.swift` covers the stage
+    with a click-through window at desktop level instead, and
+    `restore.sh` kills it.
+13. **Safari caches the site for an hour** (the worker sends
+    `max-age=3600`), so picker titles showed old copy.
+    `stage-safari.applescript` adds `?v=<epoch>`, which is invisible
+    because Safari's address pill shows only the host.
+14. **The palette's empty state lists the user's RUNNING apps**, and every
+    partial query lists their installed apps (Chrome, ChatGPT, WhatsApp…).
+    Typing slowly is a privacy leak. The script types the query in one
+    burst, and the `cover` range cross-fades from the frame before the
+    palette opens to the first frame showing only the staged match
+    (measured at 1.98 → 2.68 s on 2026-09-30).
+15. **Terminal titles leak the user name and window size**
+    (`<user> — -zsh — 146×41`). A temporary `WinkDemo` profile drops the
+    size, and each window `cd`s into `stage/<name>` and calls
+    `update_terminal_cwd`, which gives `api — -zsh`. `restore.sh` deletes
+    the profile. Don't query Terminal via osascript after restore: that
+    relaunches it.
+16. **`screencapture` writes variable frame rate, so `ffmpeg -ss` lands
+    on the wrong frames.** To measure anything, decode with `-vf fps=N`,
+    as `compose.mjs` and `calibrate.py` do. A clip also "ends" at its last
+    changed frame (the cheat-sheet .mov reports 4.6 s), and the
+    compositor holds that frame.
