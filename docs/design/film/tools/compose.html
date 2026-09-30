@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Guide Clip Composer</title>
+<!--
+  Composites one raw screen recording into a guide clip: brand backdrop,
+  rounded "screen" viewport, an eased virtual camera that pushes in on
+  Wink's UI, and keycast chips in the margin under the screen.
+  Driven by compose.mjs: it calls setup(spec) once, then frame(t, src) per
+  output frame. Everything is a pure function of t, as in film.html.
+-->
+<style>
+  :root {
+    --bg: #0A0D14; --surface-2: #1A2132; --text: #E9EDF6; --muted: #98A3BD;
+    --hairline: rgba(152, 163, 189, 0.16); --accent: #FFB454;
+    --mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); overflow: hidden; }
+  #stage {
+    position: absolute; left: 0; top: 0; width: 1600px; height: 1000px; overflow: hidden;
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(1100px 620px at 50% 30%, rgba(255, 180, 84, 0.07), transparent 70%),
+      radial-gradient(rgba(152, 163, 189, 0.085) 1.3px, transparent 1.3px);
+    background-size: auto, 24px 24px;
+  }
+  #screen {
+    position: absolute; left: 80px; top: 44px; width: 1440px; height: 810px;
+    border-radius: 18px; overflow: hidden; background: #07090E;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 40px 90px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  #screen img { position: absolute; left: 0; top: 0; transform-origin: 0 0; image-rendering: auto; }
+  #b { opacity: 0; }
+  #veil { position: absolute; inset: 0; background: #07090E; pointer-events: none; }
+  #keys {
+    position: absolute; left: 0; width: 1600px; top: 886px; height: 80px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .kc {
+    min-width: 56px; height: 56px; padding: 0 16px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--hairline); box-shadow: 0 4px 0 #05070B;
+  }
+  .kc.hy { color: var(--accent); border-color: rgba(255, 180, 84, 0.55); font-family: -apple-system, "SF Pro Display", sans-serif; font-size: 27px; font-weight: 600; }
+  .tag { font-family: var(--mono); font-size: 17px; color: var(--muted); letter-spacing: 0.06em; margin-left: 4px; }
+  .plus { font-family: var(--mono); font-size: 20px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="screen"><img id="a"><img id="b"><div id="veil"></div></div>
+  <div id="keys"></div>
+</div>
+<script>
+"use strict";
+const SRC_W = 1920, SRC_H = 1080, TOP = 28;          // crop the stage's menu-bar strip
+const VW = 1440, VH = 810, BASE = VW / (SRC_W * 0.972); // z = 1 shows 1866 source px
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+// Smootherstep-flavoured ease with a long, soft landing (camera moves).
+const ease = p => { p = clamp(p); return p * p * p * (p * (p * 6 - 15) + 10); };
+function spring(dt, k = 520, z = 0.6) {
+  if (dt <= 0) return 0;
+  const w = Math.sqrt(k), wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * dt) * (Math.cos(wd * dt) + (z * w / wd) * Math.sin(wd * dt));
+}
+
+let SPEC = null;
+window.setup = spec => { SPEC = spec; };
+
+function camera(t) {
+  const ks = SPEC.camera; // [{t, cx, cy, z}] moves ease between consecutive keys
+  let c = ks[0];
+  if (t >= ks[ks.length - 1].t) c = ks[ks.length - 1];
+  else for (let i = 1; i < ks.length; i++) {
+    if (t < ks[i].t) {
+      const a = ks[i - 1], b = ks[i], p = ease(seg(t, a.t, b.t));
+      c = { cx: lerp(a.cx, b.cx, p), cy: lerp(a.cy, b.cy, p), z: lerp(a.z, b.z, p) };
+      break;
+    }
+  }
+  const s = BASE * c.z;
+  // keep the view inside the recorded area
+  const halfW = VW / 2 / s, halfH = VH / 2 / s;
+  const cx = clamp(c.cx, halfW, SRC_W - halfW);
+  const cy = clamp(c.cy, TOP + halfH, SRC_H - halfH);
+  return { s, x: VW / 2 - cx * s, y: VH / 2 - cy * s };
+}
+
+function place(img, cam) {
+  img.style.transform = `translate(${cam.x.toFixed(3)}px, ${cam.y.toFixed(3)}px) scale(${cam.s.toFixed(5)})`;
+}
+
+function keycast(t) {
+  // Chips for the most recent event group; typed letters within 0.6 s join one row.
+  const evs = SPEC.events.filter(e => e.t <= t);
+  if (!evs.length) return "";
+  const last = evs[evs.length - 1];
+  let group = [last];
+  if (/^[A-Z]$/.test(last.label)) {
+    for (let i = evs.length - 2; i >= 0 && /^[A-Z]$/.test(evs[i].label) && group[0].t - evs[i].t < 0.6; i--) group.unshift(evs[i]);
+  }
+  const holdUntil = last.until ?? last.t + 1.4;
+  const out = 1 - clamp((t - holdUntil) / 0.25);
+  if (out <= 0) return "";
+  const parts = [];
+  // a typed burst logs its letters a few ms apart: spread them for legibility
+  group = group.map((e, i) => (group.length > 1 ? { ...e, t: group[0].t + i * 0.09 } : e));
+  for (const e of group) {
+    if (e.t > t) continue;
+    const words = e.label.split(" ");
+    const tag = words[0] === "hold" ? words.shift() : null;
+    words.forEach((w, i) => {
+      const p = spring(t - e.t - i * 0.05);
+      const o = clamp((t - e.t - i * 0.05) / 0.08) * out;
+      const hy = w === "⇪" ? " hy" : "";
+      if (i > 0 && group.length === 1) parts.push(`<span class="plus" style="opacity:${o.toFixed(3)}">+</span>`);
+      parts.push(`<span class="kc${hy}" style="opacity:${o.toFixed(3)};transform:translateY(${(10 * (1 - p)).toFixed(2)}px) scale(${lerp(0.9, 1, p).toFixed(3)})">${w}</span>`);
+    });
+    if (tag) parts.push(`<span class="tag" style="opacity:${out.toFixed(3)}">hold</span>`);
+  }
+  return parts.join("");
+}
+
+// src: {a, b, mix} — b cross-fades over a (used to mask a region of time)
+window.frame = async (t, src) => {
+  const a = document.getElementById("a"), b = document.getElementById("b");
+  const load = (img, url) => (img.src === url ? Promise.resolve() : (img.src = url, img.decode()));
+  await Promise.all([load(a, src.a), src.b ? load(b, src.b) : Promise.resolve()]);
+  const cam = camera(t);
+  place(a, cam); place(b, cam);
+  b.style.opacity = src.b ? src.mix : 0;
+  document.getElementById("keys").innerHTML = keycast(t);
+  // loop seam: dip the screen to the backdrop at both ends
+  const d = SPEC.duration, f = Math.min(clamp(t / 0.35), clamp((d - t) / 0.35));
+  document.getElementById("veil").style.opacity = (1 - ease(f)).toFixed(3);
+  document.getElementById("keys").style.opacity = ease(f).toFixed(3);
+};
+</script>
+</body>
+</html>

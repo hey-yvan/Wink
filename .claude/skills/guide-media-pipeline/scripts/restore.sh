@@ -21,6 +21,13 @@ for f in shortcuts.json usage.db recent-apps.json; do
   fi
 done
 
+# Profiles/ (0.7.5+) is the real shortcut store; stage.sh removed it so the
+# demo migrated in. Replace the demo-created one with the backup verbatim.
+rm -rf "$APPSUP/Profiles"
+if [ -d "$BACKUP/AppSupport/Profiles" ]; then
+  cp -a "$BACKUP/AppSupport/Profiles" "$APPSUP/Profiles"
+fi
+
 # restore the ENTIRE defaults domain from the backup export — the shoot
 # touches more than AppleLanguages (and future stagings may touch more
 # still); delete-then-import puts back exactly what stage.sh saved
@@ -54,6 +61,8 @@ if [ -f "$BACKUP/pomofox-was-running" ]; then
   open -g -a PomoFox 2>/dev/null || true
 fi
 osascript -e 'tell application "Safari" to quit' 2>/dev/null || true
+pkill -x backdrop 2>/dev/null || true
+osascript -e 'tell application "Terminal" to if (exists settings set "WinkDemo") then delete settings set "WinkDemo"' 2>/dev/null || true
 osascript -e 'tell application "Terminal" to quit' 2>/dev/null || true
 # Notes was only launched by the ⇪N demo chord — quit it unless the
 # user already had it running before staging (Safari/Terminal need no
