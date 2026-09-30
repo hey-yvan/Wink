@@ -592,6 +592,22 @@
   .principle h3 { font-family: var(--mono); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
   .principle p { font-size: 14px; color: var(--muted); }
 
+  /* ---------- film (code-drawn loop) ---------- */
+  .film {
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #0A0D14;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+    aspect-ratio: 16 / 9;
+  }
+  .film video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .film-caption {
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+    letter-spacing: 0.03em; margin-top: 14px; text-align: center;
+  }
+
   /* ---------- download ---------- */
   .download { padding: 108px 0 96px; text-align: center; }
   .download-inner { display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -718,6 +734,21 @@
     <div class="wrap">
       <span class="eyebrow">Why Wink</span>
       <p><span class="quiet">A switcher shows you every window, then asks you to choose.</span><br>Wink skips the question — <mark>you already knew where you were going.</mark></p>
+    </div>
+  </section>
+
+  <!-- ================= film ================= -->
+  <section class="section" id="film">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">In motion</p>
+        <h2>Twenty-four seconds, start to finish.</h2>
+        <p class="lede">Summon and dismiss, walk the windows, hold to choose, type two letters, hold ⇪ for the map — the whole idea, in one loop.</p>
+      </div>
+      <figure class="film">
+        <video autoplay muted loop playsinline preload="metadata" poster="/media/wink-film-poster.png" src="/media/wink-film.mp4" width="1920" height="1080" aria-label="Animated walkthrough: Caps Lock becomes Hyper; Hyper+S summons and dismisses Safari; repeated Hyper+T cycles Terminal windows including a minimized one; holding Hyper+S opens the window picker; the search palette finds Figma in two letters; holding Caps Lock shows the keyboard map"></video>
+      </figure>
+      <p class="film-caption">drawn in code, frame by frame · every chord in it ships today</p>
     </div>
   </section>
 
@@ -1219,6 +1250,15 @@
           cell.style.opacity = String(OPACITY[Number(ch)]);
           grid.appendChild(cell);
         });
+      });
+    }
+
+    /* ----- film ----- */
+    if (reduceMotion) {
+      document.querySelectorAll(".film video").forEach(function (v) {
+        v.removeAttribute("autoplay");
+        v.pause();
+        v.setAttribute("controls", "");
       });
     }
 

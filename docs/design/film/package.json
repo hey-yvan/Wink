@@ -1,0 +1,13 @@
+{
+  "name": "wink-film",
+  "private": true,
+  "type": "module",
+  "description": "Renders docs/design/film/film.html to MP4, frame by frame.",
+  "scripts": {
+    "stills": "node tools/render.mjs --stills",
+    "render": "node tools/render.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

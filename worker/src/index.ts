@@ -595,6 +595,22 @@ const landingHtml = `<!doctype html>
   .principle h3 { font-family: var(--mono); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
   .principle p { font-size: 14px; color: var(--muted); }
 
+  /* ---------- film (code-drawn loop) ---------- */
+  .film {
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #0A0D14;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14);
+    aspect-ratio: 16 / 9;
+  }
+  .film video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .film-caption {
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+    letter-spacing: 0.03em; margin-top: 14px; text-align: center;
+  }
+
   /* ---------- download ---------- */
   .download { padding: 108px 0 96px; text-align: center; }
   .download-inner { display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -721,6 +737,21 @@ const landingHtml = `<!doctype html>
     <div class="wrap">
       <span class="eyebrow">Why Wink</span>
       <p><span class="quiet">A switcher shows you every window, then asks you to choose.</span><br>Wink skips the question — <mark>you already knew where you were going.</mark></p>
+    </div>
+  </section>
+
+  <!-- ================= film ================= -->
+  <section class="section" id="film">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">In motion</p>
+        <h2>Twenty-four seconds, start to finish.</h2>
+        <p class="lede">Summon and dismiss, walk the windows, hold to choose, type two letters, hold ⇪ for the map — the whole idea, in one loop.</p>
+      </div>
+      <figure class="film">
+        <video autoplay muted loop playsinline preload="metadata" poster="/media/wink-film-poster.png" src="/media/wink-film.mp4" width="1920" height="1080" aria-label="Animated walkthrough: Caps Lock becomes Hyper; Hyper+S summons and dismisses Safari; repeated Hyper+T cycles Terminal windows including a minimized one; holding Hyper+S opens the window picker; the search palette finds Figma in two letters; holding Caps Lock shows the keyboard map"></video>
+      </figure>
+      <p class="film-caption">drawn in code, frame by frame · every chord in it ships today</p>
     </div>
   </section>
 
@@ -1225,6 +1256,15 @@ const landingHtml = `<!doctype html>
       });
     }
 
+    /* ----- film ----- */
+    if (reduceMotion) {
+      document.querySelectorAll(".film video").forEach(function (v) {
+        v.removeAttribute("autoplay");
+        v.pause();
+        v.setAttribute("controls", "");
+      });
+    }
+
   })();
 </script>
 </body>
@@ -1660,7 +1700,7 @@ const guideHtml = `<!doctype html>
         <p class="sub">Setup, permissions, every frontmost behavior, the Hyper layer, and the <kbd>wink://</kbd> scheme — the whole thing, in the order you'll actually meet it.</p>
       </div>
       <div class="qf-row">
-        <div class="qf"><b>10</b><span>chapters, start to finish</span></div>
+        <div class="qf"><b>11</b><span>chapters, start to finish</span></div>
         <div class="qf"><b>2</b><span>permissions — one of them conditional</span></div>
         <div class="qf"><b>0</b><span>thumbnails — Screen Recording never asked</span></div>
       </div>
@@ -1682,6 +1722,7 @@ const guideHtml = `<!doctype html>
         <a href="#insights">07 · insights</a>
         <a href="#quiet">08 · quiet</a>
         <a href="#sharing">09 · sharing</a>
+        <a href="#troubleshooting">10 · nothing happened</a>
         <a href="#extras" class="toc-extra">also, briefly</a>
       </nav>
 
@@ -1829,12 +1870,56 @@ const guideHtml = `<!doctype html>
           <p class="eyebrow">09 · sharing &amp; scripting</p>
           <h2>Export it. Script it. Repeat it.</h2>
           <p>Your whole shortcut set is one file. <strong>Export…</strong> in <strong>Settings → Shortcuts</strong> writes a <kbd>.winkrecipe</kbd>; <strong>Import…</strong> reads one back. Importing previews a plan first — what's <strong>Ready</strong>, what <strong>Conflicts</strong>, what's <strong>Unresolved</strong> — before you commit to <strong>Skip Conflicts</strong> or <strong>Replace Existing</strong>.</p>
+          <p>Apple's Shortcuts app also discovers four localized Wink actions: <strong>Pause Wink</strong>, <strong>Resume Wink</strong>, <strong>Show Wink Search Palette</strong>, and <strong>Open Wink Settings</strong>. The Settings action can jump straight to Shortcuts, General, or Insights; Pause and Resume change only your manual pause, without overriding an exception app that is keeping capture paused.</p>
           <p>Everything is also reachable from outside the app, on the <kbd>wink://</kbd> scheme:</p>
           <div class="cli">
             <div><span class="ps">$</span> open -g "wink://toggle?bundle=com.google.Chrome"</div>
-            <div class="dim">wink://pause · wink://resume — same idea</div>
+            <div><span class="ps">$</span> open -g "wink://focus?bundle=com.google.Chrome"</div>
+            <div><span class="ps">$</span> open -g "wink://search"</div>
+            <div><span class="ps">$</span> open -g "wink://open-settings?tab=insights"</div>
+            <div class="dim">wink://pause · wink://resume · wink://open-settings</div>
           </div>
-          <p>Always call it with <kbd>open -g</kbd>. A plain <kbd>open</kbd> activates Wink to deliver the URL, which makes your actual target read as “not frontmost” and turns every toggle into a plain activate; <kbd>-g</kbd> keeps Wink in the background so the toggle sees the real frontmost state. Automation presses respect the same per-bundle cooldown as a real keypress, but they never count toward Insights.</p>
+          <p><kbd>focus</kbd> is idempotent: it brings an installed app forward but never hides it or cycles its windows when it is already frontmost. The only Settings tabs accepted are <kbd>shortcuts</kbd>, <kbd>general</kbd>, and <kbd>insights</kbd>.</p>
+          <p>Always call it with <kbd>open -g</kbd>. A plain <kbd>open</kbd> activates Wink to deliver the URL, which makes your actual target read as “not frontmost” and turns every toggle into a plain activate; <kbd>-g</kbd> keeps Wink in the background so the toggle sees the real frontmost state. Toggle requests respect the same per-bundle cooldown as a real keypress, but URL-triggered app actions never count toward Insights.</p>
+          <p>A custom URL scheme does not authenticate who called it. Wink accepts only the commands and parameters above, validates bundle identifiers against installed apps, and ignores malformed or unknown input. There are no <kbd>callback</kbd>, <kbd>x-success</kbd>, or other completion callbacks: successful URL delivery does not prove that macOS completed the asynchronous activation request.</p>
+        </article>
+
+
+        <!-- 10 -->
+        <article class="chapter" id="troubleshooting">
+          <p class="eyebrow">10 · when a chord does nothing</p>
+          <h2>Nothing happened. Here's why.</h2>
+          <p>A shortcut that does nothing means one of three things, and they are not the same problem. Capture may be <strong>paused</strong> — on purpose. macOS may have withdrawn a <strong>permission</strong>. Or the <strong>route</strong> that shortcut travels may not be ready. The menu bar pill names the first kind outright — <strong>Paused</strong>, <strong>Limited · Secure Input</strong> — but it does not watch permissions or Carbon registration, so <strong>Ready</strong> does not clear those. When the pill reads Ready and a chord still does nothing, go by <em>which</em> shortcuts died.</p>
+          <div class="list">
+            <div class="list-row">
+              <span class="term">the pill says Paused</span>
+              <span class="desc">Nothing failed — capture is off on purpose, and every shortcut stops while it is. Either you paused Wink from the menu bar, or the frontmost app is on your <strong>“Pause in exception apps”</strong> list (VMs and remote desktops ship there by default), in which case the pill names it: <strong>Paused · Parallels Desktop</strong>. Resume from the menu bar, or take the app off the list. No permission or route troubleshooting will change anything while this reads Paused.</span>
+            </div>
+            <div class="list-row">
+              <span class="term">only some shortcuts died</span>
+              <span class="desc">Whatever died shares a transport. Plain modifier chords (<kbd>⌃⌥K</kbd>) ride Carbon hot keys. Hyper chords ride the event tap. Fn-row bindings are a hybrid: Carbon delivers the press, and a narrow observer — which needs <strong>Input Monitoring</strong> — confirms the physical Fn key; either half stopping kills them. So: if the pill reads <strong>Limited · Secure Input</strong>, an app is holding Secure Input, both the tap and the Fn observer are starved, and it clears itself. If Hyper <em>and</em> Fn-row chords died together, check <strong>Input Monitoring</strong> in System Settings → Privacy &amp; Security — that one <em>is</em> a permission, and it feeds both. If <em>only</em> Fn-row chords died while Hyper still works, either half can be the culprit — a Carbon refusal, or the Fn observer failing to start (Hyper rides a different tap, so it survives that). The diagnostics export lists each failed binding with its reason, and an unavailable observer names itself there.</span>
+            </div>
+            <div class="list-row">
+              <span class="term">all of them died</span>
+              <span class="desc">Match the remedy to what your shortcuts ride, not to the count. If everything you bound lives on the Hyper layer or Fn-row keys, one revoked <strong>Input Monitoring</strong> takes out all of it — check that first, same path as above. Plain modifier chords ride Carbon through <strong>Accessibility</strong>: check it in System Settings → Privacy &amp; Security, and if Wink is listed and switched on, switch it <strong>off and on again</strong> — a stale grant looks identical to a live one from the outside. For certainty instead of guessing, the diagnostics export above names each route's readiness directly.</span>
+            </div>
+            <div class="list-row">
+              <span class="term">after an update</span>
+              <span class="desc">macOS ties a permission to the app's signature, not its name or path. A build signed differently from the one you granted is a different app as far as TCC is concerned, and both permissions have to be granted again. Being notarized does not change this — notarization is about Gatekeeper letting the app open, TCC is about what it may do afterwards. They are separate, and the diagnostics export names the signing mode so you can tell which build you are running.</span>
+            </div>
+            <div class="list-row">
+              <span class="term">only in one app</span>
+              <span class="desc">That app is probably holding Secure Input — a password field, a lock screen, a remote-desktop session. The pill reads <strong>Limited · Secure Input</strong> and it clears itself. If the app is a VM or remote desktop you use for long stretches, add it under <strong>“Pause in exception apps”</strong> instead of fighting it.</span>
+            </div>
+            <div class="list-row">
+              <span class="term">the app moved or is gone</span>
+              <span class="desc">Wink binds to a bundle identifier, not a path, so moving an app is fine. Deleting it is not: the row stays and reports the app as unavailable, so nothing fires silently into a gap.</span>
+            </div>
+          </div>
+          <p class="lead-chips">If none of that explains it, take the evidence with you:</p>
+          <p><strong>Settings → General → Diagnostics</strong> has <strong>Reveal Log</strong> and <strong>Export…</strong>. The export shows you every file and everything in it <em>before</em> anything is written, and nothing leaves the Mac unless you send it.</p>
+          <p>Your user name, home folder path, passwords, tokens, and the query strings on any web address are removed. Application names and bundle identifiers are <em>kept</em> — they are what makes the report worth reading, and they do reveal which apps you have shortcuts for. Read the preview before you share it.</p>
+          <p>When you file something, the useful report is short: Wink's version, your macOS version, what you pressed and what you expected, which kind of shortcut it was, and the export attached.</p>
         </article>
 
         <!-- closing -->
@@ -2364,7 +2449,7 @@ const guideZhHtml = `<!doctype html>
         <p class="sub">安装、权限、每一种前台行为、Hyper 层，以及 <kbd>wink://</kbd> 协议——完整讲一遍，按你真正会遇到它们的顺序。</p>
       </div>
       <div class="qf-row">
-        <div class="qf"><b>10</b><span>章节，从头到尾</span></div>
+        <div class="qf"><b>11</b><span>章节，从头到尾</span></div>
         <div class="qf"><b>2</b><span>项权限——其中一项视情况而定</span></div>
         <div class="qf"><b>0</b><span>张缩略图——从不请求屏幕录制权限</span></div>
       </div>
@@ -2386,6 +2471,7 @@ const guideZhHtml = `<!doctype html>
         <a href="#insights">07 · 洞察</a>
         <a href="#quiet">08 · 静默</a>
         <a href="#sharing">09 · 分享</a>
+        <a href="#troubleshooting">10 · 没反应</a>
         <a href="#extras" class="toc-extra">还有，顺带一提</a>
       </nav>
 
@@ -2533,12 +2619,56 @@ const guideZhHtml = `<!doctype html>
           <p class="eyebrow">09 · 分享与脚本</p>
           <h2>导出它，写成脚本，重复用。</h2>
           <p>你的整套快捷键就是一个文件。<strong>设置 → 快捷键</strong>里的<strong>导出…</strong>会写出一个 <kbd>.winkrecipe</kbd>；<strong>导入…</strong>再把它读回来。导入前会先给你看一份预览——哪些<strong>就绪</strong>、哪些<strong>冲突</strong>、哪些<strong>未解析</strong>——然后你再决定<strong>跳过冲突项</strong>还是<strong>替换现有项</strong>。</p>
+          <p>Apple 的「快捷指令」App 还会发现四个本地化 Wink 操作：<strong>暂停 Wink</strong>、<strong>恢复 Wink</strong>、<strong>显示 Wink 搜索面板</strong>和<strong>打开 Wink 设置</strong>。设置操作可以直接跳到快捷键、通用或洞察；暂停与恢复只改变你的手动暂停，不会覆盖仍在让捕获保持暂停的例外应用。</p>
           <p>所有功能也能从应用外部触达，走 <kbd>wink://</kbd> 协议：</p>
           <div class="cli">
             <div><span class="ps">$</span> open -g "wink://toggle?bundle=com.google.Chrome"</div>
-            <div class="dim">wink://pause · wink://resume — 同样的用法</div>
+            <div><span class="ps">$</span> open -g "wink://focus?bundle=com.google.Chrome"</div>
+            <div><span class="ps">$</span> open -g "wink://search"</div>
+            <div><span class="ps">$</span> open -g "wink://open-settings?tab=insights"</div>
+            <div class="dim">wink://pause · wink://resume · wink://open-settings</div>
           </div>
-          <p>始终用 <kbd>open -g</kbd> 调用它。单纯的 <kbd>open</kbd> 会先激活 Wink 来投递这个 URL，这会让你真正的目标应用被判定成"不在前台"，把每一次切换都变成单纯的激活；<kbd>-g</kbd> 能让 Wink 留在后台，这样切换看到的才是真实的前台状态。自动化触发遵守和真实按键一样的按应用冷却时间，但从不计入洞察。</p>
+          <p><kbd>focus</kbd> 是幂等的：它会把已安装的 App 带到前台，但目标已经在前台时绝不会隐藏它，也不会轮换它的窗口。设置页只接受 <kbd>shortcuts</kbd>、<kbd>general</kbd> 和 <kbd>insights</kbd> 三个 tab 值。</p>
+          <p>始终用 <kbd>open -g</kbd> 调用它。单纯的 <kbd>open</kbd> 会先激活 Wink 来投递这个 URL，这会让你真正的目标应用被判定成“不在前台”，把每一次切换都变成单纯的激活；<kbd>-g</kbd> 能让 Wink 留在后台，这样切换看到的才是真实的前台状态。Toggle 请求遵守和真实按键一样的按应用冷却时间，但 URL 触发的应用操作从不计入洞察。</p>
+          <p>自定义 URL 协议无法认证调用方。Wink 只接受上面列出的命令和参数，会根据已安装 App 校验 bundle identifier，并忽略格式错误或未知的输入。协议不提供 <kbd>callback</kbd>、<kbd>x-success</kbd> 或其他完成回调：URL 投递成功不代表 macOS 已经完成异步激活请求。</p>
+        </article>
+
+
+        <!-- 10 -->
+        <article class="chapter" id="troubleshooting">
+          <p class="eyebrow">10 · 按了没反应</p>
+          <h2>什么都没发生。原因在这。</h2>
+          <p>快捷键没反应，是三种情况之一，而它们不是一回事：捕获可能被<strong>暂停</strong>了——有意为之；可能 macOS 收回了<strong>权限</strong>；也可能这个快捷键走的<strong>通道</strong>没就绪。菜单栏胶囊只会直接点名第一类——<strong>Paused</strong>、<strong>Limited · Secure Input</strong>——它不监视权限和 Carbon 注册，所以 <strong>Ready</strong> 不能排除后两类。胶囊显示 Ready 而组合键依然没反应时，看<em>哪些</em>快捷键失灵了。</p>
+          <div class="list">
+            <div class="list-row">
+              <span class="term">胶囊显示 Paused</span>
+              <span class="desc">什么都没坏——捕获是被有意关掉的，暂停期间所有快捷键都会停。要么你在菜单栏手动暂停了 Wink，要么当前前台 App 在<strong>「在例外 App 中暂停」</strong>列表里（虚拟机和远程桌面默认就在列表中），这时胶囊会点名它：<strong>Paused · Parallels Desktop</strong>。从菜单栏恢复，或把该 App 移出列表。只要还显示 Paused，去折腾权限或通道都不会有任何变化。</span>
+            </div>
+            <div class="list-row">
+              <span class="term">只有一部分失灵</span>
+              <span class="desc">失灵的那批走的是同一条通道。普通修饰键组合（<kbd>⌃⌥K</kbd>）走 Carbon 热键；Hyper 组合键走事件监听；Fn 行绑定是混合通道——按键由 Carbon 送达，另有一个需要<strong>输入监控</strong>的窄观察器确认物理 Fn 键，两半任何一半停摆它就失灵。所以：胶囊显示 <strong>Limited · Secure Input</strong> 时，是某个 App 占住了安全输入，事件监听和 Fn 观察器同时被饿死，它会自行恢复；Hyper <em>和</em> Fn 行一起失灵，去「系统设置 → 隐私与安全性」查<strong>输入监控</strong>——那一项是真正的权限，两者都靠它；<em>只有</em> Fn 行失灵而 Hyper 正常，两半都可能是元凶——Carbon 拒绝注册，或 Fn 观察器没能启动（Hyper 走的是另一个事件监听，所以它不受影响）。诊断导出会按键位列出每个失败绑定及其原因，观察器不可用时会在里面自报家门。</span>
+            </div>
+            <div class="list-row">
+              <span class="term">全部失灵</span>
+              <span class="desc">对症下药要看你的快捷键走什么通道，而不是看死了几个。如果你绑的全在 Hyper 层或 Fn 行，一个被撤销的<strong>输入监控</strong>就能全部杀掉——先查它，路径同上一行。普通修饰键组合走 Carbon，依赖<strong>辅助功能</strong>：去「系统设置 → 隐私与安全性」检查，如果 Wink 已列出且开关是打开的，把它<strong>关掉再打开</strong>——失效的授权从外面看和有效的一模一样。想要证据而不是猜测，上文的诊断导出会直接列出每条通道的就绪状态。</span>
+            </div>
+            <div class="list-row">
+              <span class="term">更新之后</span>
+              <span class="desc">macOS 把权限绑定在 App 的<strong>签名</strong>上，而不是名称或路径。签名方式和你当初授权时不同的构建，在 TCC 眼里就是另一个 App，两个权限都要重新授予。已公证也改变不了这一点——公证管的是 Gatekeeper 让不让它打开，TCC 管的是打开之后能做什么，两者互不相干。诊断导出里会写明签名方式，方便你判断自己在跑哪种构建。</span>
+            </div>
+            <div class="list-row">
+              <span class="term">只在某个 App 里失灵</span>
+              <span class="desc">那个 App 多半占用了安全输入——密码框、锁屏、远程桌面。状态标签会显示 <strong>Limited · Secure Input</strong>，并会自行恢复。如果那是你长时间使用的虚拟机或远程桌面，把它加进<strong>「在例外应用中暂停」</strong>，比硬碰硬省事。</span>
+            </div>
+            <div class="list-row">
+              <span class="term">App 被移动或删除了</span>
+              <span class="desc">Wink 绑定的是 Bundle ID 而不是路径，所以移动 App 没问题。删除就不行了：那一行会保留并标记为「应用不可用」，不会悄悄地对着一个空位触发。</span>
+            </div>
+          </div>
+          <p class="lead-chips">如果以上都解释不了，把证据带上：</p>
+          <p><strong>设置 → 通用 → 诊断信息</strong>里有<strong>显示日志</strong>和<strong>导出…</strong>。导出会在写入<em>之前</em>把每个文件和其中的全部内容展示给你，除非你自己发出去，否则不会离开这台 Mac。</p>
+          <p>你的用户名、个人文件夹路径、密码、令牌，以及网址中的查询参数都会被移除。应用名称和 Bundle ID 会<em>保留</em>——正是它们让报告有阅读价值，同时也会暴露你为哪些应用设置了快捷键。分享前先看一眼预览。</p>
+          <p>提交问题时，有用的报告很短：Wink 版本、macOS 版本、你按了什么、期待发生什么、属于哪一类快捷键，再附上导出。</p>
         </article>
 
         <!-- closing -->
