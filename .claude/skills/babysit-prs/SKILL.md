@@ -176,9 +176,9 @@ Proceed to **NEXT ITERATION**.
 - `/codex:review` results are **session-local only** — they do not appear as PR comments. Check session memory, not `gh pr view --comments`.
 - `/code-review` and bot reviews post durable PR comments readable via `gh pr view --comments` across iterations.
 - CronCreate can duplicate-deliver long prompts. This skill exists to avoid that — do not inline its content into `/loop`.
-- Stop hooks that return `block` on infrastructure failures cause **infinite loops** (Claude responds → hook blocks → Claude responds again). The rate-limit-detector hook must always exit 0. See `docs/lessons-learned.md` § "Codex Stop Hook Infinite Loop".
+- Stop hooks that return `block` on infrastructure failures cause **infinite loops** (Claude responds → hook blocks → Claude responds again). See `docs/lessons-learned.md` § "Codex Stop Hook Infinite Loop".
 - All bot review findings block merge regardless of priority level. A P2 finding that slips through causes follow-up fix PRs. See `docs/lessons-learned.md` § "babysit-prs Bot Review Findings Must All Block Merge".
-- When API quota is fully exhausted, neither the circuit breaker nor the Stop hook can fire — the loop will empty-fire at the configured interval. This is a `/loop` infrastructure limitation, not a bug in this skill.
+- When API quota is fully exhausted, the circuit breaker cannot fire — the loop will empty-fire at the configured interval. This is a `/loop` infrastructure limitation, not a bug in this skill.
 - `claude -p` (headless mode) does not support skills. Always use `/loop` for recurring work, never shell-scripted headless invocations.
 - You MAY append entries to `docs/lessons-learned.md` when discovering operational insights.
 
@@ -215,6 +215,6 @@ Verification     → checklist all green, circuit breaker → closed
 |------|-------------|---------|
 | `references/review-gates.md` | Step 1c (review feedback) | Three-tier review tool behavior, confidence thresholds, degraded-tooling handling |
 | `references/macos-runtime-policy.md` | Step 4 (implement) | Runtime-sensitive change definition, validation tracking for non-macOS hosts |
-| `references/circuit-breaker.md` | Iteration Guard (circuit breaker) | Full state machine, backoff schedule, Stop hook integration details |
+| `references/circuit-breaker.md` | Iteration Guard (circuit breaker) | Full state machine, backoff schedule |
 | `docs/lessons-learned.md` | When discovering operational insights | Append new entries; check for relevant gotchas before implementing |
 | `docs/loop-job-guide.md` | Session Init (first iteration) | `/loop` behavior, interval syntax, limitations |

@@ -55,13 +55,7 @@ closed ──(failure ≥ 2)──► open ──(cooldown expired)──► hal
 | 4 | 120 minutes |
 | 5+ | 240 minutes (cap) |
 
-## External Writer: Stop Hook
-
-The Stop hook (`.claude/hooks/rate-limit-detector.sh`) also writes to this state file. It detects rate-limit signals in the session transcript after Claude responds, covering cases where Claude can respond but the response itself indicates rate limiting.
-
-**Important**: The Stop hook always exits 0 (never blocks) to avoid the infinite loop documented in `docs/lessons-learned.md` § "Codex Stop Hook Infinite Loop".
-
 ## Limitations
 
-- When API quota is fully exhausted, Claude cannot respond at all. Neither the skill-level circuit breaker nor the Stop hook can fire. The loop will continue to empty-fire at the configured interval. This is a `/loop` infrastructure limitation.
+- When API quota is fully exhausted, Claude cannot respond at all. The skill-level circuit breaker cannot fire. The loop will continue to empty-fire at the configured interval. This is a `/loop` infrastructure limitation.
 - The circuit breaker cannot distinguish between API rate limits and `gh` CLI rate limits. Both trigger the same cooldown.
