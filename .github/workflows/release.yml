@@ -605,7 +605,7 @@ jobs:
 
       - name: Upload dry-run artifacts
         if: ${{ env.DRY_RUN == 'true' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-dry-run-${{ env.VERSION }}
           path: |
@@ -657,7 +657,7 @@ jobs:
 
       - name: Retain notarization evidence
         if: ${{ always() && env.SIGNING_MODE == 'developer-id' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: notarization-${{ github.run_id }}-${{ github.run_attempt }}
           path: build/notarization/
